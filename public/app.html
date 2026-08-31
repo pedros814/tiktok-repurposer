@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Repurposer — App</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a; color: #fff;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      padding: 40px 20px;
+    }
+    h1 { font-size: 2.5rem; margin-bottom: 10px; background: linear-gradient(90deg, #ff0050, #00f2ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    p.sub { color: #888; margin-bottom: 20px; font-size: 1.1rem; text-align: center; }
+    .container { width: 100%; max-width: 800px; }
+
+    .badge {
+      display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem;
+      font-weight: 600; margin-bottom: 20px;
+    }
+    .badge.free { background: #1a1a1a; border: 1px solid #333; color: #aaa; }
+    .badge.pro { background: linear-gradient(90deg, #ff0050, #ff4081); color: #fff; }
+    .badge span { color: #00f2ea; }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+    .tab {
+      padding: 12px 28px; border-radius: 10px; border: 1px solid #333;
+      background: #1a1a1a; color: #888; cursor: pointer; font-size: 1rem;
+      user-select: none; transition: all 0.2s;
+    }
+    .tab.active { background: linear-gradient(90deg, #ff0050, #ff4081); color: #fff; border-color: transparent; }
+    .tab:hover:not(.active) { border-color: #ff0050; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .dropzone {
+      border: 2px dashed #333; border-radius: 16px; padding: 50px 20px; text-align: center;
+      background: #1a1a1a; cursor: pointer; transition: all 0.2s;
+    }
+    .dropzone:hover { border-color: #ff0050; }
+    input[type="file"] { display: none; }
+
+    textarea {
+      width: 100%; min-height: 200px; padding: 16px; border-radius: 12px;
+      border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 1rem;
+      resize: vertical;
+    }
+    textarea:focus { outline: none; border-color: #ff0050; }
+
+    button.main {
+      width: 100%; padding: 16px; margin-top: 16px; border-radius: 12px; border: none;
+      background: linear-gradient(90deg, #ff0050, #ff4081);
+      color: #fff; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button.main:hover { transform: scale(1.02); }
+    button.main:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .loading { display: none; text-align: center; color: #888; margin: 20px 0; }
+    .results { display: none; gap: 20px; flex-direction: column; margin-top: 20px; }
+    .card {
+      background: #1a1a1a; border-radius: 16px; padding: 24px; border: 1px solid #333;
+    }
+    .card h3 { color: #00f2ea; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .card pre { white-space: pre-wrap; word-wrap: break-word; color: #ccc; line-height: 1.6; font-family: inherit; }
+    .copy-btn {
+      background: #333; padding: 6px 14px; border-radius: 8px;
+      font-size: 0.8rem; cursor: pointer; border: none; color: #fff;
+    }
+    .copy-btn:hover { background: #444; }
+    .error { color: #ff4081; text-align: center; margin-top: 16px; }
+    .filename { color: #888; margin-top: 8px; font-size: 0.9rem; }
+
+    #paywall {
+      display: none; text-align: center; padding: 60px 20px;
+      background: #1a1a1a; border-radius: 24px; border: 1px solid #333;
+      max-width: 600px; width: 100%; animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    #paywall h2 { font-size: 2rem; margin-bottom: 16px; }
+    #paywall p { color: #aaa; margin-bottom: 30px; line-height: 1.6; }
+    #paywall .price {
+      font-size: 3.5rem; font-weight: bold; background: linear-gradient(90deg, #ff0050, #00f2ea);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    #paywall .price span { font-size: 1rem; color: #888; -webkit-text-fill-color: #888; font-weight: normal; }
+    #paywall ul { text-align: left; display: inline-block; color: #ccc; margin: 20px 0; list-style: none; }
+    #paywall ul li { margin: 8px 0; padding-left: 24px; position: relative; }
+    #paywall ul li::before { content: "✓"; position: absolute; left: 0; color: #00f2ea; font-weight: bold; }
+    #paywall button.pay {
+      padding: 16px 40px; border-radius: 12px; border: none;
+      background: linear-gradient(90deg, #ff0050, #ff4081);
+      color: #fff; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+      margin-top: 10px; width: 100%; max-width: 300px;
+    }
+    #paywall button.pay:disabled { opacity: 0.6; }
+    #paywall .debug-btn {
+      margin-top: 20px; background: #222; color: #666; border: 1px solid #333;
+      padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; cursor: pointer;
+    }
+
+    .success-banner {
+      display: none; background: linear-gradient(90deg, #00f2ea33, #00f2ea11);
+      border: 1px solid #00f2ea; border-radius: 12px; padding: 16px; margin-bottom: 20px;
+      color: #00f2ea; text-align: center; font-weight: 600;
+    }
+  </style>
+<base target="_blank">
+</head>
+<body>
+  <h1>🚀 TikTok Repurposer</h1>
+  <p class="sub">Transforme n'importe quelle video TikTok en contenu viral</p>
+
+  <div class="success-banner" id="successBanner">🎉 Bienvenue ! Ton abonnement est actif. Generation illimitee.</div>
+
+  <div class="container" id="app-content">
+    <div style="text-align:center;">
+      <div class="badge free" id="badge">Essais gratuits restants : <span>3</span></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('audio', this)">🎵 Upload Audio</div>
+      <div class="tab" onclick="switchTab('text', this)">📝 Coller le texte</div>
+    </div>
+
+    <div class="panel active" id="panel-audio">
+      <div class="dropzone" onclick="document.getElementById('fileInput').click()">
+        <p>Clique ici ou glisse un fichier audio (MP3, M4A, WAV)</p>
+        <p class="filename" id="audioFilename"></p>
+      </div>
+      <input type="file" id="fileInput" accept="audio/*" onchange="handleFile(this.files[0])">
+      <button class="main" id="btnAudio" onclick="generateAudio()" disabled>Generer</button>
+    </div>
+
+    <div class="panel" id="panel-text">
+      <textarea id="textInput" placeholder="Colle ici la transcription de ta video TikTok..."></textarea>
+      <button class="main" id="btnText" onclick="generateText()">Generer</button>
+    </div>
+
+    <div class="loading" id="loading">⏳ Analyse en cours... (10-30s)</div>
+    <div class="error" id="error"></div>
+
+    <div class="results" id="results">
+      <div class="card">
+        <h3>🐦 Thread Twitter <button class="copy-btn" onclick="copy('twitter')">Copier</button></h3>
+        <pre id="twitter"></pre>
+      </div>
+      <div class="card">
+        <h3>💼 Post LinkedIn <button class="copy-btn" onclick="copy('linkedin')">Copier</button></h3>
+        <pre id="linkedin"></pre>
+      </div>
+      <div class="card">
+        <h3>🎬 Script Shorts <button class="copy-btn" onclick="copy('shorts')">Copier</button></h3>
+        <pre id="shorts"></pre>
+      </div>
+      <div class="card">
+        <h3>📝 Source</h3>
+        <pre id="transcript" style="font-size:0.9rem;color:#666;"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div id="paywall">
+    <h2>🔒 Limite atteinte !</h2>
+    <p>Tu as utilise tes 3 generations gratuites.<br>Passe a la version Pro pour un acces illimite.</p>
+    <div class="price">9.90€ <span>/ mois</span></div>
+    <ul>
+      <li>Generations illimitees</li>
+      <li>Audio + Texte</li>
+      <li>Export copie en 1 clic</li>
+      <li>Support prioritaire</li>
+      <li>Annulation a tout moment</li>
+    </ul>
+    <button class="pay" id="payBtn" onclick="goToCheckout()">🚀 Passer a Pro</button>
+    <p style="margin-top:16px;font-size:0.8rem;color:#555;">Paiement securise par Stripe</p>
+    <button class="debug-btn" onclick="simulatePayment()">🔧 Activer Pro (debug)</button>
+  </div>
+
+  <script>
+    let currentFile = null, currentBase64 = null;
+    let userStatus = 'free', remaining = 3;
+    let clientId = localStorage.getItem('tk_client_id');
+    if (!clientId) {
+      clientId = 'cid_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('tk_client_id', clientId);
+    }
+
+    async function checkStatus() {
+      try {
+        const res = await fetch('/api/status', { headers: { 'X-Client-ID': clientId } });
+        const data = await res.json();
+        userStatus = data.status;
+        remaining = data.remaining;
+        updateBadge();
+
+        if (userStatus === 'active') {
+          document.getElementById('badge').className = 'badge pro';
+          document.getElementById('badge').innerHTML = '✨ Abonnement Pro actif';
+        }
+
+        const params = new URLSearchParams(location.search);
+        if (params.get('success') === '1' && userStatus === 'active') {
+          document.getElementById('successBanner').style.display = 'block';
+          setTimeout(() => document.getElementById('successBanner').style.display = 'none', 5000);
+          history.replaceState(null, '', '/app.html');
+        }
+      } catch (e) { console.error(e); }
+    }
+    checkStatus();
+
+    function updateBadge() {
+      if (userStatus !== 'active') {
+        document.querySelector('#badge span').textContent = remaining;
+      }
+    }
+
+    function switchTab(tabName, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('panel-' + tabName).classList.add('active');
+      document.getElementById('error').textContent = '';
+    }
+
+    function handleFile(file) {
+      if (!file) return;
+      currentFile = file;
+      document.getElementById('audioFilename').textContent = '✅ ' + file.name;
+      document.getElementById('btnAudio').disabled = false;
+      const reader = new FileReader();
+      reader.onload = () => { currentBase64 = reader.result.split(',')[1]; };
+      reader.readAsDataURL(file);
+    }
+
+    async function generateAudio() {
+      if (!currentBase64) return;
+      await callApi('/from-audio', { filename: currentFile.name, data: currentBase64 });
+    }
+
+    async function generateText() {
+      const text = document.getElementById('textInput').value.trim();
+      if (text.length < 10) {
+        document.getElementById('error').textContent = 'Texte trop court (min 10 caracteres)';
+        return;
+      }
+      await callApi('/from-text', { text });
+    }
+
+    async function callApi(endpoint, payload) {
+      if (userStatus !== 'active' && remaining <= 0) {
+        showPaywall(); return;
+      }
+      document.getElementById('error').textContent = '';
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('btnAudio').disabled = true;
+      document.getElementById('btnText').disabled = true;
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Client-ID': clientId },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.error === 'QUOTA_EXCEEDED') { showPaywall(); return; }
+        if (data.error) throw new Error(data.error);
+
+        document.getElementById('twitter').textContent = Array.isArray(data.twitter_thread)
+          ? data.twitter_thread.join('\n\n')
+          : data.twitter_thread;
+        document.getElementById('linkedin').textContent = data.linkedin_post;
+        document.getElementById('shorts').textContent = data.shorts_script;
+        document.getElementById('transcript').textContent = data.transcript;
+        document.getElementById('results').style.display = 'flex';
+
+        if (userStatus !== 'active') {
+          remaining--;
+          updateBadge();
+          if (remaining <= 0) setTimeout(showPaywall, 2000);
+        }
+      } catch (e) {
+        document.getElementById('error').textContent = 'Erreur : ' + e.message;
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('btnAudio').disabled = !currentBase64;
+        document.getElementById('btnText').disabled = false;
+      }
+    }
+
+    function showPaywall() {
+      document.getElementById('app-content').style.display = 'none';
+      document.getElementById('paywall').style.display = 'block';
+    }
+
+    async function goToCheckout() {
+      const btn = document.getElementById('payBtn');
+      btn.disabled = true; btn.textContent = 'Redirection...';
+      try {
+        const res = await fetch('/api/create-checkout-session', {
+          method: 'POST',
+          headers: { 'X-Client-ID': clientId }
+        });
+        const data = await res.json();
+        if (data.url) window.location.href = data.url;
+        else throw new Error(data.error);
+      } catch (e) {
+        btn.disabled = false; btn.textContent = '🚀 Passer a Pro';
+        alert('Erreur paiement : ' + e.message);
+      }
+    }
+
+    async function simulatePayment() {
+      try {
+        const res = await fetch('/api/simulate-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Client-ID': clientId }
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('✅ Compte active ! La page va se recharger.');
+          location.reload();
+        }
+      } catch (e) {
+        alert('Erreur : ' + e.message);
+      }
+    }
+
+    function copy(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text);
+      const btn = event.target;
+      btn.textContent = 'Copie !';
+      setTimeout(() => btn.textContent = 'Copier', 1500);
+    }
+  </script>
+</body>
+</html>

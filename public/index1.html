@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Repurposer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a; color: #fff;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      padding: 40px 20px;
+    }
+    h1 { font-size: 2.5rem; margin-bottom: 10px; background: linear-gradient(90deg, #ff0050, #00f2ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    p.sub { color: #888; margin-bottom: 30px; font-size: 1.1rem; text-align: center; }
+    .container { width: 100%; max-width: 800px; }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+    .tab {
+      padding: 12px 28px; border-radius: 10px; border: 1px solid #333;
+      background: #1a1a1a; color: #888; cursor: pointer; font-size: 1rem;
+      user-select: none;
+    }
+    .tab.active { background: linear-gradient(90deg, #ff0050, #ff4081); color: #fff; border-color: transparent; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .dropzone {
+      border: 2px dashed #333; border-radius: 16px; padding: 50px 20px; text-align: center;
+      background: #1a1a1a; cursor: pointer; transition: all 0.2s;
+    }
+    .dropzone:hover { border-color: #ff0050; }
+    input[type="file"] { display: none; }
+
+    textarea {
+      width: 100%; min-height: 200px; padding: 16px; border-radius: 12px;
+      border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 1rem;
+      resize: vertical;
+    }
+    textarea:focus { outline: none; border-color: #ff0050; }
+
+    button.main {
+      width: 100%; padding: 16px; margin-top: 16px; border-radius: 12px; border: none;
+      background: linear-gradient(90deg, #ff0050, #ff4081);
+      color: #fff; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+    }
+    button.main:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .loading { display: none; text-align: center; color: #888; margin: 20px 0; }
+    .results { display: none; gap: 20px; flex-direction: column; margin-top: 20px; }
+    .card {
+      background: #1a1a1a; border-radius: 16px; padding: 24px; border: 1px solid #333;
+    }
+    .card h3 { color: #00f2ea; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .card pre { white-space: pre-wrap; word-wrap: break-word; color: #ccc; line-height: 1.6; font-family: inherit; }
+    .copy-btn {
+      background: #333; padding: 6px 14px; border-radius: 8px;
+      font-size: 0.8rem; cursor: pointer; border: none; color: #fff;
+    }
+    .copy-btn:hover { background: #444; }
+    .error { color: #ff4081; text-align: center; margin-top: 16px; }
+    .filename { color: #888; margin-top: 8px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>🚀 TikTok Repurposer</h1>
+  <p class="sub">Upload l'audio de ta vidéo TikTok ou colle la transcription → reçois 3 formats viraux</p>
+
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('audio', this)">🎵 Upload Audio</div>
+      <div class="tab" onclick="switchTab('text', this)">📝 Coller le texte</div>
+    </div>
+
+    <!-- PANEL AUDIO -->
+    <div class="panel active" id="panel-audio">
+      <div class="dropzone" onclick="document.getElementById('fileInput').click()">
+        <p>Clique ici ou glisse un fichier audio (MP3, M4A, WAV)</p>
+        <p class="filename" id="audioFilename"></p>
+      </div>
+      <input type="file" id="fileInput" accept="audio/*" onchange="handleFile(this.files[0])">
+      <button class="main" id="btnAudio" onclick="generateAudio()" disabled>Générer</button>
+    </div>
+
+    <!-- PANEL TEXTE -->
+    <div class="panel" id="panel-text">
+      <textarea id="textInput" placeholder="Colle ici la transcription de ta vidéo TikTok..."></textarea>
+      <button class="main" id="btnText" onclick="generateText()">Générer</button>
+    </div>
+
+    <div class="loading" id="loading">⏳ Analyse en cours... (10-30s)</div>
+    <div class="error" id="error"></div>
+
+    <div class="results" id="results">
+      <div class="card">
+        <h3>🐦 Thread Twitter <button class="copy-btn" onclick="copy('twitter')">Copier</button></h3>
+        <pre id="twitter"></pre>
+      </div>
+      <div class="card">
+        <h3>💼 Post LinkedIn <button class="copy-btn" onclick="copy('linkedin')">Copier</button></h3>
+        <pre id="linkedin"></pre>
+      </div>
+      <div class="card">
+        <h3>🎬 Script Shorts <button class="copy-btn" onclick="copy('shorts')">Copier</button></h3>
+        <pre id="shorts"></pre>
+      </div>
+      <div class="card">
+        <h3>📝 Source</h3>
+        <pre id="transcript" style="font-size:0.9rem;color:#666;"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentFile = null;
+    let currentBase64 = null;
+
+    function switchTab(tabName, el) {
+      // Reset all tabs
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      
+      // Activate clicked tab and panel
+      el.classList.add('active');
+      document.getElementById('panel-' + tabName).classList.add('active');
+      document.getElementById('error').textContent = '';
+    }
+
+    function handleFile(file) {
+      if (!file) return;
+      currentFile = file;
+      document.getElementById('audioFilename').textContent = '✅ ' + file.name;
+      document.getElementById('btnAudio').disabled = false;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        currentBase64 = reader.result.split(',')[1];
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function generateAudio() {
+      if (!currentBase64) return;
+      await callApi('/from-audio', { filename: currentFile.name, data: currentBase64 });
+    }
+
+    async function generateText() {
+      const text = document.getElementById('textInput').value.trim();
+      if (text.length < 10) {
+        document.getElementById('error').textContent = 'Texte trop court (min 10 caractères)';
+        return;
+      }
+      await callApi('/from-text', { text });
+    }
+
+    async function callApi(endpoint, payload) {
+      document.getElementById('error').textContent = '';
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('btnAudio').disabled = true;
+      document.getElementById('btnText').disabled = true;
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        document.getElementById('twitter').textContent = Array.isArray(data.twitter_thread)
+          ? data.twitter_thread.join('\n\n')
+          : data.twitter_thread;
+        document.getElementById('linkedin').textContent = data.linkedin_post;
+        document.getElementById('shorts').textContent = data.shorts_script;
+        document.getElementById('transcript').textContent = data.transcript;
+        document.getElementById('results').style.display = 'flex';
+      } catch (e) {
+        document.getElementById('error').textContent = 'Erreur : ' + e.message;
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('btnAudio').disabled = !currentBase64;
+        document.getElementById('btnText').disabled = false;
+      }
+    }
+
+    function copy(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text);
+      const btn = event.target;
+      btn.textContent = 'Copié !';
+      setTimeout(() => btn.textContent = 'Copier', 1500);
+    }
+  </script>
+</body>
+</html>
