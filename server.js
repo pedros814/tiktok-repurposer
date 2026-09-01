@@ -201,10 +201,11 @@ RÈGLES ABSOLUES
 - Pas de conclusion qui résume ce qui précède.
 
 twitter_thread (4 à 5 tweets, 240 caractères max chacun)
-- NON-RÉPÉTITION ABSOLUE : Chaque tweet doit apporter un événement ou un fait strictement NOUVEAU. Interdiction formelle de répéter les mêmes mots-clés, lieux, actions ou faits d'un tweet à l'autre (ex: ne jamais répéter "marchait pieds nus dans Athènes").
-- Tweet 1 : le hook. Une affirmation forte qui crée une tension ou contredit une idée reçue. Jamais de question rhétorique, jamais le mot "thread".
-- Tweets suivants : un fait précis ou une action chronologique par tweet.
-- Dernier tweet : une prise de position tranchée.
+- VARIATION DES AMORCES : Interdiction absolue de commencer deux tweets par les mêmes mots ou le même lieu (ex: ne pas répéter "À Athènes" ou "Socrate" au début des phrases).
+- NON-RÉPÉTITION DES FAITS : Chaque tweet fait avancer l'histoire de manière séquentielle. Un fait énoncé dans le tweet 1 ne doit jamais réapparaître dans les tweets suivants.
+- Tweet 1 (Hook) : Un paradoxe ou une affirmation choc. Pas de présentation passive.
+- Tweets suivants : Déroulement d'actions concrètes, une seule idée par tweet.
+- Dernier tweet : Prise de position tranchée.
 
 linkedin_post (150 à 250 mots)
 - Ouverture : une situation concrète en 1 à 2 lignes, sans préambule.
