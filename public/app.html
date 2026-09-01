@@ -24,24 +24,29 @@
     .badge.pro { background: #1A1B16; color: #F0EFE9; }
     .badge span { color: #B5431F; }
 
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
-    .tab {
-      padding: 12px 28px; border-radius: 10px; border: 1px solid #D7D5CB;
-      background: #fff; color: #5F6157; cursor: pointer; font-size: 1rem;
-      user-select: none; transition: all 0.2s; font-family: 'Archivo', sans-serif;
-    }
-    .tab.active { background: #1A1B16; color: #F0EFE9; border-color: #1A1B16; }
-    .tab:hover:not(.active) { border-color: #1A1B16; }
-
-    .panel { display: none; }
-    .panel.active { display: block; }
+    .back { margin-bottom: 20px; }
+    .back a { color: #5F6157; text-decoration: none; font-size: 0.9rem; }
+    .back a:hover { color: #1A1B16; }
 
     .dropzone {
       border: 2px dashed #D7D5CB; border-radius: 16px; padding: 50px 20px; text-align: center;
       background: #fff; cursor: pointer; transition: all 0.2s;
     }
     .dropzone:hover { border-color: #1A1B16; }
+    .dropzone.dragover { border-color: #1A1B16; background: #F8F7F3; }
     input[type="file"] { display: none; }
+
+    .progress-container {
+      display: none; margin-top: 16px; background: #fff; border-radius: 8px;
+      border: 1px solid #D7D5CB; padding: 16px;
+    }
+    .progress-bar {
+      width: 100%; height: 8px; background: #D7D5CB; border-radius: 4px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; background: #1A1B16; width: 0%; transition: width 0.2s;
+    }
+    .progress-text { font-size: 0.85rem; color: #5F6157; margin-top: 8px; }
 
     textarea {
       width: 100%; min-height: 200px; padding: 16px; border-radius: 12px;
@@ -102,9 +107,16 @@
       border: 1px solid #1A1B16; border-radius: 12px; padding: 16px; margin-bottom: 20px;
       color: #1A1B16; text-align: center; font-weight: 600;
     }
-    .back { margin-bottom: 20px; }
-    .back a { color: #5F6157; text-decoration: none; font-size: 0.9rem; }
-    .back a:hover { color: #1A1B16; }
+
+    .or-divider { text-align: center; margin: 20px 0; color: #5F6157; font-size: 0.9rem; }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+    .tab {
+      padding: 10px 24px; border-radius: 8px; border: 1px solid #D7D5CB;
+      background: #fff; color: #5F6157; cursor: pointer; font-size: 0.9rem;
+      font-family: 'Archivo', sans-serif;
+    }
+    .tab.active { background: #1A1B16; color: #F0EFE9; border-color: #1A1B16; }
   </style>
 <base target="_blank">
 </head>
@@ -121,23 +133,30 @@
       <div class="badge free" id="badge">Essais gratuits restants : <span>3</span></div>
     </div>
 
+    <!-- UPLOAD VIDEO/AUDIO -->
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+      <p>🎬 Glisse ta vidéo ici (MP4, MOV) ou un fichier audio</p>
+      <p class="filename" id="fileLabel"></p>
+    </div>
+    <input type="file" id="fileInput" accept="video/*,audio/*" onchange="handleFile(this.files[0])">
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">Upload...</div>
+    </div>
+
+    <button class="main" id="btnMedia" onclick="generateMedia()" disabled>Générer</button>
+
+    <div class="or-divider">— ou —</div>
+
+    <!-- TABS -->
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('audio', this)">🎵 Upload Audio</div>
-      <div class="tab" onclick="switchTab('text', this)">📝 Coller le texte</div>
+      <div class="tab active" onclick="switchTab('text', this)">📝 Coller du texte</div>
     </div>
 
-    <div class="panel active" id="panel-audio">
-      <div class="dropzone" onclick="document.getElementById('fileInput').click()">
-        <p>Clique ici ou glisse un fichier audio (MP3, M4A, WAV)</p>
-        <p class="filename" id="audioFilename"></p>
-      </div>
-      <input type="file" id="fileInput" accept="audio/*" onchange="handleFile(this.files[0])">
-      <button class="main" id="btnAudio" onclick="generateAudio()" disabled>Générer</button>
-    </div>
-
-    <div class="panel" id="panel-text">
+    <div class="panel active" id="panel-text">
       <textarea id="textInput" placeholder="Colle ici la transcription de ta vidéo..."></textarea>
-      <button class="main" id="btnText" onclick="generateText()">Générer</button>
+      <button class="main" id="btnText" onclick="generateText()">Générer depuis le texte</button>
     </div>
 
     <div class="loading" id="loading">⏳ Analyse en cours... (10-30s)</div>
@@ -169,7 +188,7 @@
     <div class="price">9.90 € <span>/ mois</span></div>
     <ul>
       <li>Générations illimitées</li>
-      <li>Audio + Texte</li>
+      <li>Vidéo + Audio + Texte</li>
       <li>Export copie en 1 clic</li>
       <li>Résiliable à tout moment</li>
     </ul>
@@ -178,7 +197,7 @@
   </div>
 
   <script>
-    let currentFile = null, currentBase64 = null;
+    let currentFile = null;
     let userStatus = 'free', remaining = 3;
     let clientId = localStorage.getItem('tk_client_id');
     if (!clientId) {
@@ -193,12 +212,10 @@
         userStatus = data.status;
         remaining = data.remaining;
         updateBadge();
-
         if (userStatus === 'active') {
           document.getElementById('badge').className = 'badge pro';
           document.getElementById('badge').innerHTML = '✨ Abonnement Pro actif';
         }
-
         const params = new URLSearchParams(location.search);
         if (params.get('success') === '1' && userStatus === 'active') {
           document.getElementById('successBanner').style.display = 'block';
@@ -223,19 +240,83 @@
       document.getElementById('error').textContent = '';
     }
 
+    // Drag & drop
+    const dz = document.getElementById('dropzone');
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault(); dz.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) { document.getElementById('fileInput').files = e.dataTransfer.files; handleFile(file); }
+    });
+
     function handleFile(file) {
       if (!file) return;
       currentFile = file;
-      document.getElementById('audioFilename').textContent = '✅ ' + file.name;
-      document.getElementById('btnAudio').disabled = false;
-      const reader = new FileReader();
-      reader.onload = () => { currentBase64 = reader.result.split(',')[1]; };
-      reader.readAsDataURL(file);
+      document.getElementById('fileLabel').textContent = '✅ ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' Mo)';
+      document.getElementById('btnMedia').disabled = false;
     }
 
-    async function generateAudio() {
-      if (!currentBase64) return;
-      await callApi('/from-audio', { filename: currentFile.name, data: currentBase64 });
+    // Upload avec barre de progression (XMLHttpRequest)
+    function generateMedia() {
+      if (!currentFile) return;
+      if (userStatus !== 'active' && remaining <= 0) { showPaywall(); return; }
+
+      const fd = new FormData();
+      fd.append('file', currentFile);
+
+      document.getElementById('error').textContent = '';
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('progressContainer').style.display = 'block';
+      document.getElementById('btnMedia').disabled = true;
+      document.getElementById('btnText').disabled = true;
+
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener('progress', e => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          document.getElementById('progressFill').style.width = pct + '%';
+          document.getElementById('progressText').textContent = pct + '% — envoi du fichier...';
+        }
+      });
+
+      xhr.addEventListener('load', () => {
+        document.getElementById('progressContainer').style.display = 'none';
+        document.getElementById('btnMedia').disabled = false;
+        document.getElementById('btnText').disabled = false;
+
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (data.error) {
+              document.getElementById('error').textContent = data.message || data.error;
+              return;
+            }
+            displayResults(data);
+          } catch (e) {
+            document.getElementById('error').textContent = 'Erreur de parsing : ' + e.message;
+          }
+        } else {
+          try {
+            const err = JSON.parse(xhr.responseText);
+            document.getElementById('error').textContent = err.message || err.error || 'Erreur serveur';
+          } catch (e) {
+            document.getElementById('error').textContent = 'Erreur serveur (' + xhr.status + ')';
+          }
+        }
+      });
+
+      xhr.addEventListener('error', () => {
+        document.getElementById('progressContainer').style.display = 'none';
+        document.getElementById('btnMedia').disabled = false;
+        document.getElementById('btnText').disabled = false;
+        document.getElementById('error').textContent = 'Erreur réseau. Réessaie.';
+      });
+
+      xhr.open('POST', '/from-media');
+      xhr.setRequestHeader('X-Client-ID', clientId);
+      xhr.send(fd);
     }
 
     async function generateText() {
@@ -248,13 +329,10 @@
     }
 
     async function callApi(endpoint, payload) {
-      if (userStatus !== 'active' && remaining <= 0) {
-        showPaywall(); return;
-      }
+      if (userStatus !== 'active' && remaining <= 0) { showPaywall(); return; }
       document.getElementById('error').textContent = '';
       document.getElementById('results').style.display = 'none';
       document.getElementById('loading').style.display = 'block';
-      document.getElementById('btnAudio').disabled = true;
       document.getElementById('btnText').disabled = true;
 
       try {
@@ -265,42 +343,36 @@
         });
         const data = await res.json();
         if (data.error === 'QUOTA_EXCEEDED') { showPaywall(); return; }
-        if (data.error === 'CONTENU_INSUFFISANT') {
-          document.getElementById('error').textContent = data.message;
+        if (data.error) {
+          document.getElementById('error').textContent = data.message || data.error;
           document.getElementById('loading').style.display = 'none';
-          document.getElementById('btnAudio').disabled = !currentBase64;
           document.getElementById('btnText').disabled = false;
           return;
         }
-        if (data.error === 'QUALITE_INSUFFISANTE') {
-          document.getElementById('error').textContent = data.message;
-          document.getElementById('loading').style.display = 'none';
-          document.getElementById('btnAudio').disabled = !currentBase64;
-          document.getElementById('btnText').disabled = false;
-          return;
-        }
-        if (data.error) throw new Error(data.error);
-
-        document.getElementById('twitter').textContent = Array.isArray(data.twitter_thread)
-          ? data.twitter_thread.join('\n\n')
-          : data.twitter_thread;
-        document.getElementById('linkedin').textContent = data.linkedin_post;
-        document.getElementById('shorts').textContent = data.shorts_script;
-        document.getElementById('transcript').textContent = data.transcript;
-        document.getElementById('results').style.display = 'flex';
-
-        if (userStatus !== 'active') {
-          remaining--;
-          updateBadge();
-          if (remaining <= 0) setTimeout(showPaywall, 2000);
-        }
+        displayResults(data);
       } catch (e) {
         document.getElementById('error').textContent = 'Erreur : ' + e.message;
-      } finally {
         document.getElementById('loading').style.display = 'none';
-        document.getElementById('btnAudio').disabled = !currentBase64;
         document.getElementById('btnText').disabled = false;
       }
+    }
+
+    function displayResults(data) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('twitter').textContent = Array.isArray(data.twitter_thread)
+        ? data.twitter_thread.join('\n\n')
+        : data.twitter_thread;
+      document.getElementById('linkedin').textContent = data.linkedin_post;
+      document.getElementById('shorts').textContent = data.shorts_script;
+      document.getElementById('transcript').textContent = data.transcript;
+      document.getElementById('results').style.display = 'flex';
+
+      if (userStatus !== 'active') {
+        remaining--;
+        updateBadge();
+        if (remaining <= 0) setTimeout(showPaywall, 2000);
+      }
+      document.getElementById('btnText').disabled = false;
     }
 
     function showPaywall() {

@@ -6,13 +6,17 @@ import { dirname, join } from 'path';
 import { randomUUID, createHash } from 'crypto';
 import fs from 'fs';
 import { createReadStream } from 'fs';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import OpenAI from 'openai';
 import Database from 'better-sqlite3';
 import Stripe from 'stripe';
+import multer from 'multer';
 
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const execFileP = promisify(execFile);
 
 const PORT = process.env.PORT || 3000;
 const FREE_LIMIT = parseInt(process.env.FREE_LIMIT || '3');
@@ -112,7 +116,6 @@ function filtrerThread(thread) {
   });
 }
 
-// ========== PARSER JSON ROBUSTE ==========
 function parseJSONRobuste(raw) {
   if (!raw) return null;
   let clean = raw.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -131,17 +134,21 @@ function parseJSONRobuste(raw) {
           return JSON.parse(fixed);
         } catch (e3) {
           console.error('[JSON] Echec parsing:', e3.message);
-          console.error('[JSON] Brut:', raw.substring(0, 300));
           return null;
         }
       }
     }
-    console.error('[JSON] Aucun JSON trouve:', raw.substring(0, 300));
     return null;
   }
 }
 
 const app = express();
+
+// Multer config
+const upload = multer({
+  dest: join(__dirname, 'tmp'),
+  limits: { fileSize: 200 * 1024 * 1024 }
+});
 
 app.post('/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   if (!STRIPE_WEBHOOK_SECRET) {
@@ -218,8 +225,6 @@ app.post('/api/create-checkout-session', async (req, res) => {
 async function generateFromText(text, res) {
   console.log(`[GEN] Starting, text length: ${text.length}`);
 
-  // ETAPE 1: ANALYSE
-  console.log('[GEN] Step 1: Analysis...');
   let analysis;
   try {
     const analysisCompletion = await openai.chat.completions.create({
@@ -249,8 +254,6 @@ async function generateFromText(text, res) {
     });
   }
 
-  // ETAPE 2: GENERATION
-  console.log('[GEN] Step 2: Writing...');
   let result;
   try {
     const genCompletion = await openai.chat.completions.create({
@@ -277,7 +280,6 @@ async function generateFromText(text, res) {
     return res.status(500).json({ error: 'Erreur generation du contenu. Reessaie.' });
   }
 
-  // Post-processing
   if (Array.isArray(result.twitter_thread)) {
     const avant = result.twitter_thread.length;
     result.twitter_thread = filtrerThread(result.twitter_thread);
@@ -296,6 +298,56 @@ async function generateFromText(text, res) {
   res.json(result);
 }
 
+// ========== FROM-MEDIA : upload MP4/MP3 avec multer + ffmpeg ==========
+app.post('/from-media', upload.single('file'), async (req, res) => {
+  const fingerprint = getFingerprint(req);
+  const quota = canUse(fingerprint);
+  if (!quota.allowed) {
+    return res.status(403).json({ error: 'QUOTA_EXCEEDED', message: 'Limite atteinte. Abonne-toi pour continuer.' });
+  }
+  if (!req.file) return res.status(400).json({ error: 'Aucun fichier recu' });
+
+  const src = req.file.path;
+  const audioPath = src + '.mp3';
+
+  try {
+    console.log(`[MEDIA] Extracting audio from ${req.file.originalname}...`);
+    await execFileP('ffmpeg', [
+      '-i', src,
+      '-vn',
+      '-ac', '1',
+      '-ar', '16000',
+      '-b:a', '48k',
+      '-y', audioPath
+    ]);
+
+    const { size } = fs.statSync(audioPath);
+    if (size > 24 * 1024 * 1024) {
+      return res.status(400).json({ error: 'VIDEO_TROP_LONGUE', message: 'Video trop longue (max ~40 min).' });
+    }
+
+    console.log('[MEDIA] Transcribing with Whisper...');
+    const transcription = await openai.audio.transcriptions.create({
+      file: createReadStream(audioPath),
+      model: 'whisper-1'
+    });
+
+    if (!transcription.text || transcription.text.trim().length < 20) {
+      return res.status(422).json({ error: 'TRANSCRIPTION_VIDE', message: 'L\'audio ne contient pas assez de parole.' });
+    }
+
+    console.log(`[MEDIA] Transcribed: ${transcription.text.length} chars`);
+    await generateFromText(transcription.text, res);
+    upsertUsageStmt.run(fingerprint);
+  } catch (err) {
+    console.error('[MEDIA ERROR]', err.message);
+    res.status(500).json({ error: 'Traitement impossible. Verifie que le fichier est lisible.' });
+  } finally {
+    [src, audioPath].forEach(p => { if (fs.existsSync(p)) fs.unlinkSync(p); });
+  }
+});
+
+// Legacy endpoints (gardes pour compatibilite)
 app.post('/from-text', async (req, res) => {
   const fingerprint = getFingerprint(req);
   const quota = canUse(fingerprint);
@@ -315,50 +367,7 @@ app.post('/from-text', async (req, res) => {
   }
 });
 
-app.post('/from-audio', async (req, res) => {
-  const fingerprint = getFingerprint(req);
-  const quota = canUse(fingerprint);
-  if (!quota.allowed) {
-    return res.status(403).json({ error: 'QUOTA_EXCEEDED', message: 'Limite atteinte. Abonne-toi pour continuer.' });
-  }
-  const { filename, data } = req.body;
-  if (!data) return res.status(400).json({ error: 'Aucun fichier recu' });
-
-  const sizeMB = (data.length * 0.75) / 1024 / 1024;
-  if (sizeMB > 25) {
-    return res.status(413).json({ error: 'Fichier trop lourd (max 25 Mo).' });
-  }
-
-  const uid = randomUUID().slice(0, 8);
-  const ext = filename?.split('.').pop() || 'mp3';
-  const audioPath = join(__dirname, 'tmp', `${uid}.${ext}`);
-
-  try {
-    if (!fs.existsSync(join(__dirname, 'tmp'))) fs.mkdirSync(join(__dirname, 'tmp'));
-    fs.writeFileSync(audioPath, Buffer.from(data, 'base64'));
-
-    console.log('[GEN] Transcribing audio...');
-    const transcription = await openai.audio.transcriptions.create({
-      file: createReadStream(audioPath),
-      model: 'whisper-1',
-    });
-
-    fs.unlinkSync(audioPath);
-
-    if (!transcription.text || transcription.text.trim().length < 20) {
-      return res.status(422).json({ error: 'TRANSCRIPTION_VIDE', message: 'L\'audio ne contient pas assez de parole.' });
-    }
-
-    console.log(`[GEN] Audio transcribed, length: ${transcription.text.length}`);
-    await generateFromText(transcription.text, res);
-    upsertUsageStmt.run(fingerprint);
-  } catch (err) {
-    if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
-    console.error('[GEN ERROR]', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
 app.listen(PORT, () => {
   console.log(`Server: http://localhost:${PORT}`);
+  console.log(`FFmpeg: ${process.env.FFMPEG_VERSION || 'system'}`);
 });
