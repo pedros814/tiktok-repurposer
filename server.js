@@ -191,46 +191,24 @@ Réponds UNIQUEMENT en JSON :
 }
 
 Pour "verification" : ne signale que ce qui mérite un doute (attribution contestée, chiffre invraisemblable, anecdote connue pour être apocryphe). Tableau vide si tout est solide.`;
-const PROMPT_GENERATION = `Tu écris pour un créateur de contenu. Tu construis un contenu autonome, tu ne résumes jamais la vidéo.
+const PROMPT_GENERATION = `Tu écris du contenu viral à partir d'une histoire vraie.
 
-RÈGLES ABSOLUES
-- Zéro hashtag. Zéro emoji.
-- Formules interdites : "plongeons", "voici pourquoi", "game-changer", "imaginez", "et si", "la plupart des gens pensent", "dans cet article", "il est important de", "au final", "en résumé".
-- Chaque bloc doit contenir des faits concrets : qui fait quoi, où, quand.
-- Phrases courtes. Une idée par phrase.
-- Pas de conclusion qui résume.
+EXEMPLE DE THREAD PARFAIT :
+Tweet 1 (HOOK) : "Un chauffeur a donné une conférence de physique à la place d'Einstein. Personne dans la salle n'a rien remarqué."
+Tweet 2 (DÉBUT) : "Einstein faisait la tournée des universités avec le même discours. Son chauffeur l'entendait à chaque trajet depuis le siège avant."
+Tweet 3 (CONFLIT) : "Un soir, le chauffeur propose de monter sur scène à sa place. Einstein, fatigué, accepte."
+Tweet 4 (CLIMAX) : "Un professeur pose une question piège sur la relativité. Le chauffeur ne panique pas. Il dit que la question est trop simple et la renvoie à Einstein, assis au fond."
+Tweet 5 (OPINION) : "Ce qui a formé le chauffeur, c'est pas un diplôme. C'est trois ans dans une voiture à écouter un homme penser à voix haute."
 
-twitter_thread (4 à 5 tweets, 240 caractères max chacun)
+RÈGLES :
+- 4-5 tweets, 240c max, zero hashtag/emoji
+- Chaque tweet = UNE étape : Hook → Début → Conflit → Climax → Opinion
+- Pas de formules : "plongeons", "voici pourquoi", "game-changer", "au final"
+- Pas de conclusion qui résume
+- LinkedIn : 150-250 mots, ouverture concrète, fin = question ouverte ancrée dans le métier
+- Shorts : 3 paragraphes (accroche 10 mots, développement 50 mots, chute 30 mots), aucun timecode
 
-STRUCTURE OBLIGATOIRE — chaque tweet correspond à UNE étape et UNE seule :
-
-Tweet 1 (HOOK) : Commence par la fin ou le résultat le plus choquant. Ne raconte PAS comment on y arrive. Juste l'aboutissement.
-→ Exemple : "Un chauffeur a donné une conférence de physique à la place d'Einstein. Personne dans la salle n'a rien remarqué."
-
-Tweet 2 (DÉBUT) : Comment ça commence. Qui fait quoi au départ. Un seul fait.
-→ Exemple : "Einstein faisait la tournée des universités avec le même discours. Son chauffeur l'entendait à chaque trajet depuis le siège avant."
-
-Tweet 3 (CONFLIT) : L'élément perturbateur. Ce qui change la donne.
-→ Exemple : "Un soir, le chauffeur propose de monter sur scène à sa place. Einstein, fatigué, accepte."
-
-Tweet 4 (CLIMAX) : Le moment de vérité. La tension maximale.
-→ Exemple : "Un professeur pose une question piège sur la relativité. Le chauffeur ne panique pas. Il dit que la question est trop simple et la renvoie à Einstein, assis au fond."
-
-Tweet 5 (PRISE DE POSITION) : Ta conclusion tranchée. Pas un résumé. Une opinion forte.
-→ Exemple : "Ce qui a formé le chauffeur, c'est pas un diplôme. C'est trois ans dans une voiture à écouter un homme penser à voix haute. L'environnement bat le cursus."
-
-RÈGLE DE COHÉRENCE : Le thread doit raconter une histoire du début à la fin. Chaque tweet dépend du précédent. Mais chaque tweet doit être compréhensible seul.
-
-linkedin_post (150 à 250 mots)
-- Ouverture : une situation concrète en 1 à 2 lignes, sans préambule.
-- Corps : le raisonnement, sauts de ligne fréquents.
-- Fin : UNE seule question ouverte, ancrée dans le métier du lecteur. Jamais sur "votre carrière".
-
-shorts_script (voix off fluide, ~90-100 mots, 3 paragraphes séparés par un saut de ligne)
-- AUCUN TIMECODE, AUCUN CROCHET. Texte 100% propre.
-- Paragraphe 1 (accroche, 3 sec, 10 mots max)
-- Paragraphe 2 (développement, 20 sec, ~50 mots, exemple concret)
-- Paragraphe 3 (chute, 15 sec, ~30 mots)
+RAPPEL : Respecte la structure du exemple ci-dessus. Hook choc → Début → Conflit → Climax → Opinion tranchée.
 
 SORTIE JSON : {"twitter_thread": [...], "linkedin_post": "...", "shorts_script": "..."}`;
 
