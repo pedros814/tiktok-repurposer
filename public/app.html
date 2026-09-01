@@ -1,409 +1,342 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ricochet — App</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #F0EFE9; color: #1A1B16;
-      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
-      padding: 40px 20px;
-    }
-    h1 { font-size: 2.2rem; margin-bottom: 8px; font-family: 'Archivo', sans-serif; font-weight: 700; letter-spacing: -0.03em; }
-    p.sub { color: #5F6157; margin-bottom: 24px; font-size: 1.1rem; text-align: center; }
-    .container { width: 100%; max-width: 800px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ricochet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F0EFE9; --card:#F8F7F3; --ink:#1A1B16; --soft:#5F6157;
+  --rule:#D7D5CB; --mark:#E2F25C; --flag:#B5431F;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:17px;line-height:1.6;padding:0 20px 60px}
+.wrap{max-width:820px;margin:0 auto}
+.ui,h1,h2,h3,button,.tab{font-family:'Archivo',system-ui,sans-serif;letter-spacing:-0.02em}
 
-    .badge {
-      display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem;
-      font-weight: 600; margin-bottom: 20px;
-    }
-    .badge.free { background: #fff; border: 1px solid #D7D5CB; color: #5F6157; }
-    .badge.pro { background: #1A1B16; color: #F0EFE9; }
-    .badge span { color: #B5431F; }
+.top{display:flex;align-items:baseline;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--rule);margin-bottom:32px}
+.top a{color:var(--soft);text-decoration:none;font-family:'Archivo',sans-serif;font-size:14px}
+.top a:hover{color:var(--ink)}
+.brand{font-weight:700;font-size:19px}
+.brand em{font-style:normal;background:var(--mark);padding:0 3px}
 
-    .back { margin-bottom: 20px; }
-    .back a { color: #5F6157; text-decoration: none; font-size: 0.9rem; }
-    .back a:hover { color: #1A1B16; }
+.quota{font-family:'Archivo',sans-serif;font-size:13px;color:var(--soft);margin-bottom:14px}
+.quota b{color:var(--ink)}
 
-    .dropzone {
-      border: 2px dashed #D7D5CB; border-radius: 16px; padding: 50px 20px; text-align: center;
-      background: #fff; cursor: pointer; transition: all 0.2s;
-    }
-    .dropzone:hover { border-color: #1A1B16; }
-    .dropzone.dragover { border-color: #1A1B16; background: #F8F7F3; }
-    input[type="file"] { display: none; }
+.drop{border:1.5px dashed var(--rule);background:var(--card);padding:44px 20px;text-align:center;cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--ink)}
+.drop .hint{font-family:'Archivo',sans-serif;font-size:15px;font-weight:500}
+.drop .sub{color:var(--soft);font-size:14px;margin-top:6px}
+input[type=file]{display:none}
 
-    .progress-container {
-      display: none; margin-top: 16px; background: #fff; border-radius: 8px;
-      border: 1px solid #D7D5CB; padding: 16px;
-    }
-    .progress-bar {
-      width: 100%; height: 8px; background: #D7D5CB; border-radius: 4px; overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%; background: #1A1B16; width: 0%; transition: width 0.2s;
-    }
-    .progress-text { font-size: 0.85rem; color: #5F6157; margin-top: 8px; }
+button{font-weight:600;font-size:15px;cursor:pointer}
+.go{width:100%;padding:14px;margin-top:12px;border:1px solid var(--ink);background:var(--ink);color:var(--paper)}
+.go:disabled{background:transparent;color:var(--soft);cursor:not-allowed}
 
-    textarea {
-      width: 100%; min-height: 200px; padding: 16px; border-radius: 12px;
-      border: 1px solid #D7D5CB; background: #fff; color: #1A1B16; font-size: 1rem;
-      resize: vertical; font-family: 'Newsreader', Georgia, serif;
-    }
-    textarea:focus { outline: none; border-color: #1A1B16; }
+details{margin-top:18px;border-top:1px solid var(--rule);padding-top:14px}
+summary{font-family:'Archivo',sans-serif;font-size:14px;color:var(--soft);cursor:pointer}
+textarea{width:100%;min-height:150px;margin-top:12px;padding:14px;border:1px solid var(--rule);background:var(--card);
+  color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:16px;resize:vertical}
+textarea:focus{outline:none;border-color:var(--ink)}
+.go.alt{background:transparent;color:var(--ink)}
 
-    button.main {
-      width: 100%; padding: 16px; margin-top: 16px; border-radius: 12px; border: none;
-      background: #1A1B16; color: #F0EFE9;
-      font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 1.1rem; cursor: pointer;
-      transition: transform 0.2s;
-    }
-    button.main:hover { transform: scale(1.02); }
-    button.main:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.bar{display:none;margin-top:14px}
+.bar .track{height:6px;background:var(--rule)}
+.bar .fill{height:100%;width:0;background:var(--ink);transition:width .2s}
+.bar .label{font-family:'Archivo',sans-serif;font-size:13px;color:var(--soft);margin-top:8px}
 
-    .loading { display: none; text-align: center; color: #5F6157; margin: 20px 0; }
-    .results { display: none; gap: 20px; flex-direction: column; margin-top: 20px; }
-    .card {
-      background: #fff; border-radius: 16px; padding: 24px; border: 1px solid #D7D5CB;
-    }
-    .card h3 { color: #1A1B16; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-family: 'Archivo', sans-serif; }
-    .card pre { white-space: pre-wrap; word-wrap: break-word; color: #1A1B16; line-height: 1.6; font-family: 'Newsreader', Georgia, serif; }
-    .copy-btn {
-      background: #F0EFE9; padding: 6px 14px; border-radius: 8px;
-      font-size: 0.8rem; cursor: pointer; border: 1px solid #D7D5CB; color: #1A1B16;
-    }
-    .copy-btn:hover { background: #D7D5CB; }
-    .error { color: #B5431F; text-align: center; margin-top: 16px; }
-    .filename { color: #5F6157; margin-top: 8px; font-size: 0.9rem; }
+.msg{margin-top:16px;padding:14px 16px;border:1px solid var(--flag);border-left-width:4px;background:var(--card);font-size:15.5px;display:none}
 
-    #paywall {
-      display: none; text-align: center; padding: 60px 20px;
-      background: #fff; border-radius: 24px; border: 1px solid #D7D5CB;
-      max-width: 600px; width: 100%; animation: fadeIn 0.4s ease;
-    }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    #paywall h2 { font-size: 2rem; margin-bottom: 16px; font-family: 'Archivo', sans-serif; }
-    #paywall p { color: #5F6157; margin-bottom: 30px; line-height: 1.6; }
-    #paywall .price {
-      font-size: 3.5rem; font-weight: 700; font-family: 'Archivo', sans-serif; letter-spacing: -0.04em;
-    }
-    #paywall .price span { font-size: 1rem; color: #5F6157; font-weight: 400; font-family: 'Newsreader', serif; }
-    #paywall ul { text-align: left; display: inline-block; color: #5F6157; margin: 20px 0; list-style: none; }
-    #paywall ul li { margin: 8px 0; padding-left: 24px; position: relative; }
-    #paywall ul li::before { content: "—"; position: absolute; left: 0; color: #1A1B16; font-weight: bold; }
-    #paywall button.pay {
-      padding: 16px 40px; border-radius: 12px; border: none;
-      background: #1A1B16; color: #F0EFE9;
-      font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 1.1rem; cursor: pointer;
-      margin-top: 10px; width: 100%; max-width: 300px;
-    }
-    #paywall button.pay:disabled { opacity: 0.6; }
+.res{display:none;margin-top:34px}
+.tabs{display:flex;gap:20px;border-bottom:1px solid var(--rule);margin-bottom:20px}
+.tab{background:none;border:0;padding:0 0 9px;color:var(--soft);border-bottom:2px solid transparent;margin-bottom:-1px;font-size:14px;font-weight:500}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ink)}
+.out{white-space:pre-wrap;word-wrap:break-word}
+.tweet{padding:12px 0;border-bottom:1px solid var(--rule);position:relative}
+.tweet:last-child{border:0}
+.tweet .n{font-family:'Archivo',sans-serif;font-size:12px;color:var(--soft);display:block;margin-bottom:4px}
+.copy{margin-top:16px;padding:8px 16px;border:1px solid var(--rule);background:var(--card);color:var(--ink)}
+.copy:hover{border-color:var(--ink)}
+.verif{margin-top:22px;border:1px solid var(--ink);border-left:4px solid var(--flag);background:var(--card);padding:14px 16px;font-size:15px}
+.verif b{font-family:'Archivo',sans-serif;font-size:12px;color:var(--flag);display:block;margin-bottom:6px}
+.src{margin-top:26px;font-size:14.5px;color:var(--soft)}
+.src summary{font-size:13px}
 
-    .success-banner {
-      display: none; background: #E2F25C;
-      border: 1px solid #1A1B16; border-radius: 12px; padding: 16px; margin-bottom: 20px;
-      color: #1A1B16; text-align: center; font-weight: 600;
-    }
-
-    .or-divider { text-align: center; margin: 20px 0; color: #5F6157; font-size: 0.9rem; }
-
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
-    .tab {
-      padding: 10px 24px; border-radius: 8px; border: 1px solid #D7D5CB;
-      background: #fff; color: #5F6157; cursor: pointer; font-size: 0.9rem;
-      font-family: 'Archivo', sans-serif;
-    }
-    .tab.active { background: #1A1B16; color: #F0EFE9; border-color: #1A1B16; }
-  </style>
-<base target="_blank">
+.paywall{display:none;text-align:center;padding:56px 20px;border:1px solid var(--ink);background:var(--card);margin-top:40px}
+.paywall h2{font-size:26px;margin-bottom:12px}
+.paywall p{color:var(--soft);margin-bottom:24px}
+.paywall .amt{font-family:'Archivo',sans-serif;font-size:46px;font-weight:700;letter-spacing:-.04em}
+.paywall .amt span{font-family:'Newsreader',serif;font-size:16px;font-weight:400;color:var(--soft);letter-spacing:0}
+.paywall .pay{margin-top:20px;padding:14px 34px;border:1px solid var(--ink);background:var(--ink);color:var(--paper)}
+.paywall .fine{font-size:13px;color:var(--soft);margin-top:14px}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.hidden{display:none}
+@media(max-width:600px){body{font-size:16px}.drop{padding:34px 16px}}
+</style>
 </head>
 <body>
-  <div class="back"><a href="/?src=app">← Retour</a></div>
+<div class="wrap">
 
-  <h1>Ricochet</h1>
-  <p class="sub">Transforme n'importe quelle vidéo en contenu écrit</p>
+  <header class="top">
+    <div class="brand">Ric<em>o</em>chet</div>
+    <a href="/">Retour</a>
+  </header>
 
-  <div class="success-banner" id="successBanner">🎉 Bienvenue ! Ton abonnement est actif. Génération illimitée.</div>
+  <div id="app">
+    <div class="quota" id="quota"></div>
 
-  <div class="container" id="app-content">
-    <div style="text-align:center;">
-      <div class="badge free" id="badge">Essais gratuits restants : <span>3</span></div>
+    <div class="drop" id="drop">
+      <div class="hint">Glisse ta vidéo, ou clique pour la choisir</div>
+      <div class="sub" id="fileLabel">MP4, MOV ou un fichier audio. 40 minutes maximum.</div>
+    </div>
+    <input type="file" id="file" accept="video/*,audio/*">
+    <button class="go" id="go" disabled>Générer les trois formats</button>
+
+    <div class="bar" id="bar">
+      <div class="track"><div class="fill" id="fill"></div></div>
+      <div class="label" id="barLabel">Envoi</div>
     </div>
 
-    <!-- UPLOAD VIDEO/AUDIO -->
-    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
-      <p>🎬 Glisse ta vidéo ici (MP4, MOV) ou un fichier audio</p>
-      <p class="filename" id="fileLabel"></p>
-    </div>
-    <input type="file" id="fileInput" accept="video/*,audio/*" onchange="handleFile(this.files[0])">
+    <details>
+      <summary>J'ai déjà la transcription</summary>
+      <textarea id="text" placeholder="Colle le texte de ta vidéo."></textarea>
+      <button class="go alt" id="goText">Générer depuis le texte</button>
+    </details>
 
-    <div class="progress-container" id="progressContainer">
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <div class="progress-text" id="progressText">Upload...</div>
-    </div>
+    <div class="msg" id="msg"></div>
 
-    <button class="main" id="btnMedia" onclick="generateMedia()" disabled>Générer</button>
-
-    <div class="or-divider">— ou —</div>
-
-    <!-- TABS -->
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('text', this)">📝 Coller du texte</div>
-    </div>
-
-    <div class="panel active" id="panel-text">
-      <textarea id="textInput" placeholder="Colle ici la transcription de ta vidéo..."></textarea>
-      <button class="main" id="btnText" onclick="generateText()">Générer depuis le texte</button>
-    </div>
-
-    <div class="loading" id="loading">⏳ Analyse en cours... (10-30s)</div>
-    <div class="error" id="error"></div>
-
-    <div class="results" id="results">
-      <div class="card">
-        <h3>🐦 Thread Twitter <button class="copy-btn" onclick="copy('twitter')">Copier</button></h3>
-        <pre id="twitter"></pre>
+    <div class="res" id="res">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-p="tw">Thread X</button>
+        <button class="tab" role="tab" aria-selected="false" data-p="li">LinkedIn</button>
+        <button class="tab" role="tab" aria-selected="false" data-p="sh">Shorts</button>
       </div>
-      <div class="card">
-        <h3>💼 Post LinkedIn <button class="copy-btn" onclick="copy('linkedin')">Copier</button></h3>
-        <pre id="linkedin"></pre>
-      </div>
-      <div class="card">
-        <h3>🎬 Script Shorts <button class="copy-btn" onclick="copy('shorts')">Copier</button></h3>
-        <pre id="shorts"></pre>
-      </div>
-      <div class="card">
-        <h3>📝 Source</h3>
-        <pre id="transcript" style="font-size:0.9rem;color:#5F6157;"></pre>
-      </div>
+      <div id="tw"></div>
+      <div id="li" class="out hidden"></div>
+      <div id="sh" class="out hidden"></div>
+      <button class="copy" id="copy">Copier</button>
+
+      <div id="verif"></div>
+
+      <details class="src">
+        <summary>Transcription</summary>
+        <div class="out" id="transcript" style="margin-top:10px"></div>
+      </details>
     </div>
   </div>
 
-  <div id="paywall">
-    <h2>🔒 Limite atteinte</h2>
-    <p>Tu as utilisé tes 3 générations gratuites.<br>Passe à la version Pro pour un accès illimité.</p>
-    <div class="price">9.90 € <span>/ mois</span></div>
-    <ul>
-      <li>Générations illimitées</li>
-      <li>Vidéo + Audio + Texte</li>
-      <li>Export copie en 1 clic</li>
-      <li>Résiliable à tout moment</li>
-    </ul>
-    <button class="pay" id="payBtn" onclick="goToCheckout()">Passer à Pro</button>
-    <p style="margin-top:16px;font-size:0.8rem;color:#5F6157;">Paiement sécurisé par Stripe</p>
+  <div class="paywall" id="paywall">
+    <h2>Tu as utilisé tes essais</h2>
+    <p>Passe en illimité pour continuer.</p>
+    <div class="amt">29 €<span> / mois</span></div>
+    <button class="pay" id="pay">S'abonner</button>
+    <div class="fine">Paiement par Stripe. Résiliable en un clic.</div>
   </div>
 
-  <script>
-    let currentFile = null;
-    let userStatus = 'free', remaining = 3;
-    let clientId = localStorage.getItem('tk_client_id');
-    if (!clientId) {
-      clientId = 'cid_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('tk_client_id', clientId);
-    }
+</div>
 
-    async function checkStatus() {
-      try {
-        const res = await fetch('/api/status', { headers: { 'X-Client-ID': clientId } });
-        const data = await res.json();
-        userStatus = data.status;
-        remaining = data.remaining;
-        updateBadge();
-        if (userStatus === 'active') {
-          document.getElementById('badge').className = 'badge pro';
-          document.getElementById('badge').innerHTML = '✨ Abonnement Pro actif';
-        }
-        const params = new URLSearchParams(location.search);
-        if (params.get('success') === '1' && userStatus === 'active') {
-          document.getElementById('successBanner').style.display = 'block';
-          setTimeout(() => document.getElementById('successBanner').style.display = 'none', 5000);
-          history.replaceState(null, '', '/app.html');
-        }
-      } catch (e) { console.error(e); }
-    }
-    checkStatus();
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var fichier = null, statut = 'free', restant = 3, data = null, ongletActif = 'tw';
 
-    function updateBadge() {
-      if (userStatus !== 'active') {
-        document.querySelector('#badge span').textContent = remaining;
-      }
-    }
+  var cid = localStorage.getItem('rico_cid');
+  if(!cid){ cid = 'cid-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2); localStorage.setItem('rico_cid', cid); }
 
-    function switchTab(tabName, el) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      el.classList.add('active');
-      document.getElementById('panel-' + tabName).classList.add('active');
-      document.getElementById('error').textContent = '';
-    }
+  /* ---------- statut ---------- */
+  fetch('/api/status', { headers: { 'X-Client-ID': cid } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      statut = d.status; restant = d.remaining;
+      majQuota();
+      var p = new URLSearchParams(location.search);
+      if(p.get('success') === '1'){ history.replaceState(null,'','/app.html'); }
+    })
+    .catch(function(){ $('quota').textContent = 'Connexion au serveur impossible.'; });
 
-    // Drag & drop
-    const dz = document.getElementById('dropzone');
-    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-    dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-    dz.addEventListener('drop', e => {
-      e.preventDefault(); dz.classList.remove('dragover');
-      const file = e.dataTransfer.files[0];
-      if (file) { document.getElementById('fileInput').files = e.dataTransfer.files; handleFile(file); }
+  function majQuota(){
+    $('quota').innerHTML = statut === 'active'
+      ? 'Abonnement actif'
+      : 'Essais restants : <b>' + restant + '</b>';
+  }
+
+  /* ---------- fichier ---------- */
+  var drop = $('drop');
+  drop.addEventListener('click', function(){ $('file').click(); });
+  drop.addEventListener('dragover', function(e){ e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', function(){ drop.classList.remove('over'); });
+  drop.addEventListener('drop', function(e){
+    e.preventDefault(); drop.classList.remove('over');
+    if(e.dataTransfer.files[0]) prendre(e.dataTransfer.files[0]);
+  });
+  $('file').addEventListener('change', function(){ if(this.files[0]) prendre(this.files[0]); });
+
+  function prendre(f){
+    var mo = f.size / 1048576;
+    if(mo > 200){ erreur('Fichier trop lourd (' + mo.toFixed(0) + ' Mo). La limite est de 200 Mo.'); return; }
+    fichier = f;
+    $('fileLabel').textContent = f.name + ' — ' + mo.toFixed(1) + ' Mo';
+    $('go').disabled = false;
+    cacherMsg();
+  }
+
+  /* ---------- messages ---------- */
+  function erreur(t){ $('msg').textContent = t; $('msg').style.display = 'block'; }
+  function cacherMsg(){ $('msg').style.display = 'none'; }
+
+  function occupe(v){
+    $('go').disabled = v || !fichier;
+    $('goText').disabled = v;
+  }
+
+  /* ---------- envoi fichier ---------- */
+  $('go').addEventListener('click', function(){
+    if(!fichier) return;
+    if(statut !== 'active' && restant <= 0){ paywall(); return; }
+
+    cacherMsg(); $('res').style.display = 'none'; occupe(true);
+    $('bar').style.display = 'block'; $('fill').style.width = '0'; $('barLabel').textContent = 'Envoi de la vidéo';
+
+    var fd = new FormData(); fd.append('file', fichier);
+    var xhr = new XMLHttpRequest();
+
+    xhr.upload.addEventListener('progress', function(e){
+      if(!e.lengthComputable) return;
+      var pct = Math.round(e.loaded / e.total * 100);
+      $('fill').style.width = pct + '%';
+      $('barLabel').textContent = 'Envoi de la vidéo — ' + pct + ' %';
+      if(pct === 100) $('barLabel').textContent = 'Transcription puis écriture, environ une minute';
     });
 
-    function handleFile(file) {
-      if (!file) return;
-      currentFile = file;
-      document.getElementById('fileLabel').textContent = '✅ ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' Mo)';
-      document.getElementById('btnMedia').disabled = false;
-    }
+    xhr.addEventListener('load', function(){
+      $('bar').style.display = 'none'; occupe(false);
+      var d = null;
+      try { d = JSON.parse(xhr.responseText); } catch(e){}
+      if(xhr.status >= 200 && xhr.status < 300 && d) return afficher(d);
+      if(d && d.error === 'QUOTA_EXCEEDED') return paywall();
+      erreur(d && d.message ? d.message : 'Le serveur a renvoyé une erreur (' + xhr.status + ').');
+    });
 
-    // Upload avec barre de progression (XMLHttpRequest)
-    function generateMedia() {
-      if (!currentFile) return;
-      if (userStatus !== 'active' && remaining <= 0) { showPaywall(); return; }
+    xhr.addEventListener('error', function(){
+      $('bar').style.display = 'none'; occupe(false);
+      erreur('Connexion interrompue pendant l\'envoi. Réessaie.');
+    });
 
-      const fd = new FormData();
-      fd.append('file', currentFile);
+    xhr.open('POST', '/from-media');
+    xhr.setRequestHeader('X-Client-ID', cid);   // pas de Content-Type : le navigateur gère le boundary
+    xhr.send(fd);
+  });
 
-      document.getElementById('error').textContent = '';
-      document.getElementById('results').style.display = 'none';
-      document.getElementById('progressContainer').style.display = 'block';
-      document.getElementById('btnMedia').disabled = true;
-      document.getElementById('btnText').disabled = true;
+  /* ---------- envoi texte ---------- */
+  $('goText').addEventListener('click', function(){
+    var t = $('text').value.trim();
+    if(t.length < 40){ erreur('Texte trop court. Il faut au moins quelques phrases.'); return; }
+    if(statut !== 'active' && restant <= 0){ paywall(); return; }
 
-      const xhr = new XMLHttpRequest();
+    cacherMsg(); $('res').style.display = 'none'; occupe(true);
+    $('bar').style.display = 'block'; $('fill').style.width = '100%'; $('barLabel').textContent = 'Écriture en cours';
 
-      xhr.upload.addEventListener('progress', e => {
-        if (e.lengthComputable) {
-          const pct = Math.round((e.loaded / e.total) * 100);
-          document.getElementById('progressFill').style.width = pct + '%';
-          document.getElementById('progressText').textContent = pct + '% — envoi du fichier...';
-        }
+    fetch('/from-text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Client-ID': cid },
+      body: JSON.stringify({ text: t })
+    })
+    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
+    .then(function(x){
+      $('bar').style.display = 'none'; occupe(false);
+      if(x.ok) return afficher(x.d);
+      if(x.d.error === 'QUOTA_EXCEEDED') return paywall();
+      erreur(x.d.message || 'La génération a échoué.');
+    })
+    .catch(function(){
+      $('bar').style.display = 'none'; occupe(false);
+      erreur('Connexion au serveur impossible.');
+    });
+  });
+
+  /* ---------- affichage ---------- */
+  function afficher(d){
+    data = d;
+
+    $('tw').innerHTML = '';
+    (d.twitter_thread || []).forEach(function(t, i){
+      var el = document.createElement('div');
+      el.className = 'tweet';
+      var n = document.createElement('span');
+      n.className = 'n';
+      n.textContent = (i + 1) + ' / ' + d.twitter_thread.length + ' — ' + t.length + ' caractères';
+      var p = document.createElement('div');
+      p.textContent = t;
+      el.appendChild(n); el.appendChild(p);
+      $('tw').appendChild(el);
+    });
+
+    $('li').textContent = d.linkedin_post || '';
+    $('sh').textContent = d.shorts_script || '';
+    $('transcript').textContent = d.transcript || '';
+
+    var v = $('verif'); v.innerHTML = '';
+    (d.verification || []).forEach(function(x){
+      var box = document.createElement('div');
+      box.className = 'verif';
+      var b = document.createElement('b'); b.textContent = 'À vérifier avant de publier';
+      var p = document.createElement('div');
+      p.textContent = x.affirmation + ' — ' + (x.note || '');
+      box.appendChild(b); box.appendChild(p);
+      v.appendChild(box);
+    });
+
+    if(typeof d.remaining === 'number'){ restant = d.remaining; majQuota(); }
+    $('res').style.display = 'block';
+    $('res').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /* ---------- onglets ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(t){
+    t.addEventListener('click', function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(x){ x.setAttribute('aria-selected','false'); });
+      t.setAttribute('aria-selected','true');
+      ongletActif = t.dataset.p;
+      ['tw','li','sh'].forEach(function(id){ $(id).classList.toggle('hidden', id !== ongletActif); });
+    });
+  });
+
+  /* ---------- copie ---------- */
+  $('copy').addEventListener('click', function(){
+    if(!data) return;
+    var txt = ongletActif === 'tw' ? (data.twitter_thread || []).join('\n\n')
+            : ongletActif === 'li' ? data.linkedin_post
+            : data.shorts_script;
+    var btn = this;
+    navigator.clipboard.writeText(txt).then(function(){
+      btn.textContent = 'Copié';
+      setTimeout(function(){ btn.textContent = 'Copier'; }, 1500);
+    });
+  });
+
+  /* ---------- paywall ---------- */
+  function paywall(){
+    $('app').style.display = 'none';
+    $('paywall').style.display = 'block';
+  }
+
+  $('pay').addEventListener('click', function(){
+    var b = this; b.disabled = true; b.textContent = 'Redirection';
+    fetch('/api/create-checkout-session', { method: 'POST', headers: { 'X-Client-ID': cid } })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.url) location.href = d.url;
+        else throw new Error(d.error || 'erreur');
+      })
+      .catch(function(){
+        b.disabled = false; b.textContent = "S'abonner";
+        erreur('Le paiement est indisponible pour le moment.');
       });
-
-      xhr.addEventListener('load', () => {
-        document.getElementById('progressContainer').style.display = 'none';
-        document.getElementById('btnMedia').disabled = false;
-        document.getElementById('btnText').disabled = false;
-
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            if (data.error) {
-              document.getElementById('error').textContent = data.message || data.error;
-              return;
-            }
-            displayResults(data);
-          } catch (e) {
-            document.getElementById('error').textContent = 'Erreur de parsing : ' + e.message;
-          }
-        } else {
-          try {
-            const err = JSON.parse(xhr.responseText);
-            document.getElementById('error').textContent = err.message || err.error || 'Erreur serveur';
-          } catch (e) {
-            document.getElementById('error').textContent = 'Erreur serveur (' + xhr.status + ')';
-          }
-        }
-      });
-
-      xhr.addEventListener('error', () => {
-        document.getElementById('progressContainer').style.display = 'none';
-        document.getElementById('btnMedia').disabled = false;
-        document.getElementById('btnText').disabled = false;
-        document.getElementById('error').textContent = 'Erreur réseau. Réessaie.';
-      });
-
-      xhr.open('POST', '/from-media');
-      xhr.setRequestHeader('X-Client-ID', clientId);
-      xhr.send(fd);
-    }
-
-    async function generateText() {
-      const text = document.getElementById('textInput').value.trim();
-      if (text.length < 20) {
-        document.getElementById('error').textContent = 'Texte trop court (min 20 caractères)';
-        return;
-      }
-      await callApi('/from-text', { text });
-    }
-
-    async function callApi(endpoint, payload) {
-      if (userStatus !== 'active' && remaining <= 0) { showPaywall(); return; }
-      document.getElementById('error').textContent = '';
-      document.getElementById('results').style.display = 'none';
-      document.getElementById('loading').style.display = 'block';
-      document.getElementById('btnText').disabled = true;
-
-      try {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-Client-ID': clientId },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (data.error === 'QUOTA_EXCEEDED') { showPaywall(); return; }
-        if (data.error) {
-          document.getElementById('error').textContent = data.message || data.error;
-          document.getElementById('loading').style.display = 'none';
-          document.getElementById('btnText').disabled = false;
-          return;
-        }
-        displayResults(data);
-      } catch (e) {
-        document.getElementById('error').textContent = 'Erreur : ' + e.message;
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('btnText').disabled = false;
-      }
-    }
-
-    function displayResults(data) {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('twitter').textContent = Array.isArray(data.twitter_thread)
-        ? data.twitter_thread.join('\n\n')
-        : data.twitter_thread;
-      document.getElementById('linkedin').textContent = data.linkedin_post;
-      document.getElementById('shorts').textContent = data.shorts_script;
-      document.getElementById('transcript').textContent = data.transcript;
-      document.getElementById('results').style.display = 'flex';
-
-      if (userStatus !== 'active') {
-        remaining--;
-        updateBadge();
-        if (remaining <= 0) setTimeout(showPaywall, 2000);
-      }
-      document.getElementById('btnText').disabled = false;
-    }
-
-    function showPaywall() {
-      document.getElementById('app-content').style.display = 'none';
-      document.getElementById('paywall').style.display = 'block';
-    }
-
-    async function goToCheckout() {
-      const btn = document.getElementById('payBtn');
-      btn.disabled = true; btn.textContent = 'Redirection...';
-      try {
-        const res = await fetch('/api/create-checkout-session', {
-          method: 'POST',
-          headers: { 'X-Client-ID': clientId }
-        });
-        const data = await res.json();
-        if (data.url) window.location.href = data.url;
-        else throw new Error(data.error);
-      } catch (e) {
-        btn.disabled = false; btn.textContent = 'Passer à Pro';
-        alert('Erreur paiement : ' + e.message);
-      }
-    }
-
-    function copy(id) {
-      const text = document.getElementById(id).textContent;
-      navigator.clipboard.writeText(text);
-      const btn = event.target;
-      btn.textContent = 'Copié !';
-      setTimeout(() => btn.textContent = 'Copier', 1500);
-    }
-  </script>
+  });
+})();
+</script>
 </body>
 </html>
