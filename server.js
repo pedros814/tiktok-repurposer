@@ -191,24 +191,37 @@ Réponds UNIQUEMENT en JSON :
 }
 
 Pour "verification" : ne signale que ce qui mérite un doute (attribution contestée, chiffre invraisemblable, anecdote connue pour être apocryphe). Tableau vide si tout est solide.`;
-const PROMPT_GENERATION = `Tu écris du contenu viral à partir d'une histoire vraie.
+const PROMPT_GENERATION = `Tu écris pour un créateur de contenu. Tu construis un contenu autonome, tu ne résumes jamais la vidéo.
 
-EXEMPLE DE THREAD PARFAIT :
-Tweet 1 (HOOK) : "Un chauffeur a donné une conférence de physique à la place d'Einstein. Personne dans la salle n'a rien remarqué."
-Tweet 2 (DÉBUT) : "Einstein faisait la tournée des universités avec le même discours. Son chauffeur l'entendait à chaque trajet depuis le siège avant."
-Tweet 3 (CONFLIT) : "Un soir, le chauffeur propose de monter sur scène à sa place. Einstein, fatigué, accepte."
-Tweet 4 (CLIMAX) : "Un professeur pose une question piège sur la relativité. Le chauffeur ne panique pas. Il dit que la question est trop simple et la renvoie à Einstein, assis au fond."
-Tweet 5 (OPINION) : "Ce qui a formé le chauffeur, c'est pas un diplôme. C'est trois ans dans une voiture à écouter un homme penser à voix haute."
+RÈGLES ABSOLUES
+- Zéro hashtag. Zéro emoji.
+- Formules interdites : "plongeons", "voici pourquoi", "game-changer", "imaginez", "et si", "la plupart des gens pensent", "dans cet article", "il est important de".
+- Chaque bloc doit contenir des faits concrets (qui, quoi, où, quand).
+- Phrases courtes et percutantes.
 
-RÈGLES :
-- 4-5 tweets, 240c max, zero hashtag/emoji
-- Chaque tweet = UNE étape : Hook → Début → Conflit → Climax → Opinion
-- Pas de formules : "plongeons", "voici pourquoi", "game-changer", "au final"
-- Pas de conclusion qui résume
-- LinkedIn : 150-250 mots, ouverture concrète, fin = question ouverte ancrée dans le métier
-- Shorts : 3 paragraphes (accroche 10 mots, développement 50 mots, chute 30 mots), aucun timecode
+EXEMPLE STRICT DE DÉCOUPAGE POUR X (À IMITER ABSOLUMENT) :
+Tweet 1 : "Un homme a été exécuté pour avoir posé trop de questions dérangeantes. Son histoire a changé le monde."
+Tweet 2 : "Il y a 2400 ans, un citoyen arpentait la place publique pour interpeller les habitants sur leurs certitudes."
+Tweet 3 : "Exaspérés, les dirigeants de la cité l'ont traîné en justice pour corruption de la jeunesse."
+Tweet 4 : "Plutôt que de fuir, il a bu le poison devant ses disciples en débattant jusqu'à son dernier souffle."
+Tweet 5 : "Ne cédez jamais sur vos convictions pour vous conformer à la majorité."
 
-RAPPEL : Respecte la structure du exemple ci-dessus. Hook choc → Début → Conflit → Climax → Opinion tranchée.
+EXIGENCES X (4 à 5 tweets) :
+- Tweet 1 (Hook) : Le résultat choc ou le paradoxe. INTERDICTION de raconter le début de l'histoire ici.
+- Tweet 2 (Début) : Le contexte initial uniquement.
+- Tweet 3 (Conflit) : L'élément perturbateur.
+- Tweet 4 (Climax) : L'action dramatique ou la fin des faits.
+- Tweet 5 (Chute) : La prise de position finale.
+- RÈGLE D'OR : Aucun événement du tweet 1 ne doit être réécrit ou reformulé dans le tweet 2.
+
+linkedin_post (150 à 250 mots)
+- Ouverture : une situation concrète en 1 à 2 lignes, sans préambule.
+- Corps : le raisonnement, sauts de ligne fréquents.
+- Fin : UNE seule question ouverte, ancrée dans le métier du lecteur. Jamais sur "votre carrière".
+
+shorts_script (voix off fluide, ~90-100 mots au total)
+- AUCUN TIMECODE, AUCUN CROCHET, AUCUN LIBELLÉ. Texte 100% propre pour la voix off.
+- 3 paragraphes séparés par un saut de ligne : Accroche (10 mots max) / Développement (~50 mots) / Chute (~30 mots).
 
 SORTIE JSON : {"twitter_thread": [...], "linkedin_post": "...", "shorts_script": "..."}`;
 
