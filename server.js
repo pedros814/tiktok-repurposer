@@ -195,32 +195,42 @@ const PROMPT_GENERATION = `Tu écris pour un créateur de contenu. Tu construis 
 
 RÈGLES ABSOLUES
 - Zéro hashtag. Zéro emoji.
-- Formules interdites : "plongeons", "voici pourquoi", "game-changer", "imaginez", "et si", "la plupart des gens pensent", "dans cet article", "il est important de".
-- Chaque bloc doit contenir des faits concrets : qui fait quoi, où, quand, combien.
-- Phrases courtes et percutantes. Une idée par phrase.
-- Pas de conclusion qui résume ce qui précède.
+- Formules interdites : "plongeons", "voici pourquoi", "game-changer", "imaginez", "et si", "la plupart des gens pensent", "dans cet article", "il est important de", "au final", "en résumé".
+- Chaque bloc doit contenir des faits concrets : qui fait quoi, où, quand.
+- Phrases courtes. Une idée par phrase.
+- Pas de conclusion qui résume.
 
 twitter_thread (4 à 5 tweets, 240 caractères max chacun)
-STRUCTURE SÉQUENTIELLE STRICTE :
-- Tweet 1 (Hook) : Une affirmation paradoxale sur la FIN ou l'impact de l'histoire. Interdiction de raconter les faits ou de présenter les personnages ici.
-- Tweet 2 (Début) : L'action initiale uniquement (qui fait quoi au départ).
-- Tweet 3 (Conflit) : L'élément perturbateur ou l'accusation.
-- Tweet 4 (Climax) : La décision ou la condamnation.
-- Tweet 5 (Prise de position) : La leçon finale tranchée.
 
-RÈGLE ANTIDOUBLON X : Chaque tweet traite une étape différente. Un mot-clé, un lieu ou une action utilisé dans un tweet ne doit PLUS JAMAIS réapparaître dans les suivants.
+STRUCTURE OBLIGATOIRE — chaque tweet correspond à UNE étape et UNE seule :
+
+Tweet 1 (HOOK) : Commence par la fin ou le résultat le plus choquant. Ne raconte PAS comment on y arrive. Juste l'aboutissement.
+→ Exemple : "Un chauffeur a donné une conférence de physique à la place d'Einstein. Personne dans la salle n'a rien remarqué."
+
+Tweet 2 (DÉBUT) : Comment ça commence. Qui fait quoi au départ. Un seul fait.
+→ Exemple : "Einstein faisait la tournée des universités avec le même discours. Son chauffeur l'entendait à chaque trajet depuis le siège avant."
+
+Tweet 3 (CONFLIT) : L'élément perturbateur. Ce qui change la donne.
+→ Exemple : "Un soir, le chauffeur propose de monter sur scène à sa place. Einstein, fatigué, accepte."
+
+Tweet 4 (CLIMAX) : Le moment de vérité. La tension maximale.
+→ Exemple : "Un professeur pose une question piège sur la relativité. Le chauffeur ne panique pas. Il dit que la question est trop simple et la renvoie à Einstein, assis au fond."
+
+Tweet 5 (PRISE DE POSITION) : Ta conclusion tranchée. Pas un résumé. Une opinion forte.
+→ Exemple : "Ce qui a formé le chauffeur, c'est pas un diplôme. C'est trois ans dans une voiture à écouter un homme penser à voix haute. L'environnement bat le cursus."
+
+RÈGLE DE COHÉRENCE : Le thread doit raconter une histoire du début à la fin. Chaque tweet dépend du précédent. Mais chaque tweet doit être compréhensible seul.
 
 linkedin_post (150 à 250 mots)
 - Ouverture : une situation concrète en 1 à 2 lignes, sans préambule.
 - Corps : le raisonnement, sauts de ligne fréquents.
-- Fin : UNE seule question ouverte, ancrée dans le métier du lecteur. Jamais sur "votre carrière" ou "le monde professionnel d'aujourd'hui".
+- Fin : UNE seule question ouverte, ancrée dans le métier du lecteur. Jamais sur "votre carrière".
 
-shorts_script (voix off fluide à lire à voix haute, ~90-100 mots au total)
-- AUCUN TIMECODE, AUCUN CROCHET, AUCUN LIBELLÉ. Le texte doit être 100% propre et prêt à être lu au micro.
-- Organise le script en 3 paragraphes distincts séparés par un saut de ligne :
-  1. L'accroche (3 secondes / 10 mots max, percutante)
-  2. Le développement (20 secondes / ~50 mots, avec l'exemple concret)
-  3. La chute (15 secondes / ~30 mots, contre-pied ou conclusion forte)
+shorts_script (voix off fluide, ~90-100 mots, 3 paragraphes séparés par un saut de ligne)
+- AUCUN TIMECODE, AUCUN CROCHET. Texte 100% propre.
+- Paragraphe 1 (accroche, 3 sec, 10 mots max)
+- Paragraphe 2 (développement, 20 sec, ~50 mots, exemple concret)
+- Paragraphe 3 (chute, 15 sec, ~30 mots)
 
 SORTIE JSON : {"twitter_thread": [...], "linkedin_post": "...", "shorts_script": "..."}`;
 
