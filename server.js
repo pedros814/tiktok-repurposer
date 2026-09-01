@@ -137,9 +137,11 @@ function aAncrageConcret(t) {
   return /[A-ZÀ-Ý]/.test(sansDebutsDePhrase);
 }
 
-function diagnostiquerTweet(t) {
+function diagnostiquerTweet(t, i) {
   if (!t || typeof t !== 'string') return 'vide';
   if (t.length > 275) return 'trop long';
+  const min = i === 0 ? 100 : 140;
+  if (t.length < min) return `trop court (${t.length} caractères)`;
   if (BANNED.test(t)) return 'formule interdite';
   if (!aAncrageConcret(t)) return 'trop abstrait, aucun fait';
   return null;
@@ -194,26 +196,19 @@ Pour "verification" : ne signale que ce qui mérite un doute (attribution contes
 const PROMPT_GENERATION = `Tu écris pour un créateur de contenu. Tu construis un contenu autonome, tu ne résumes jamais la vidéo.
 
 RÈGLES ABSOLUES
+- Écris toujours en français, quelle que soit la langue de la source.
 - Zéro hashtag. Zéro emoji.
 - Formules interdites : "plongeons", "voici pourquoi", "game-changer", "imaginez", "et si", "la plupart des gens pensent", "dans cet article", "il est important de".
 - Chaque bloc doit contenir des faits concrets (qui, quoi, où, quand).
-- Phrases courtes et percutantes.
+- Chaque tweet fait entre 140 et 240 caractères, sauf le premier (100 minimum).
+  Un tweet plus court est incomplet : il lui manque le détail concret.
 
-EXEMPLE STRICT DE DÉCOUPAGE POUR X (À IMITER ABSOLUMENT) :
-Tweet 1 : "Un homme a été exécuté pour avoir posé trop de questions dérangeantes. Son histoire a changé le monde."
-Tweet 2 : "Il y a 2400 ans, un citoyen arpentait la place publique pour interpeller les habitants sur leurs certitudes."
-Tweet 3 : "Exaspérés, les dirigeants de la cité l'ont traîné en justice pour corruption de la jeunesse."
-Tweet 4 : "Plutôt que de fuir, il a bu le poison devant ses disciples en débattant jusqu'à son dernier souffle."
-Tweet 5 : "Ne cédez jamais sur vos convictions pour vous conformer à la majorité."
-
-EXIGENCES X (4 à 5 tweets) :
-- Tweet 1 (Hook) : Le résultat choc ou le paradoxe. INTERDICTION de raconter le début de l'histoire ici.
-- Tweet 2 (Début) : Le contexte initial uniquement.
-- Tweet 3 (Conflit) : L'élément perturbateur.
-- Tweet 4 (Climax) : L'action dramatique ou la fin des faits.
-- Tweet 5 (Chute) : La prise de position finale.
-- RÈGLE D'OR : Aucun événement du tweet 1 ne doit être réécrit ou reformulé dans le tweet 2.
-
+EXEMPLE DE DÉCOUPAGE (structure et longueur à imiter) :
+Tweet 1 : "Une entreprise a perdu 460 millions de dollars en 45 minutes à cause d'une seule ligne de code oubliée. Elle n'a jamais réouvert."
+Tweet 2 : "En 2012, Knight Capital gérait un dixième du volume des actions américaines. Ce mardi-là, elle déploie un nouveau programme de trading sur ses huit serveurs. Sept reçoivent la mise à jour. Le huitième est oublié."
+Tweet 3 : "À l'ouverture des marchés, ce serveur exécute un vieux code de test resté dormant depuis huit ans. Il achète haut et vend bas, des millions de fois, sans que personne comprenne d'où viennent les ordres."
+Tweet 4 : "Il faut 45 minutes aux ingénieurs pour identifier la machine et la débrancher. La perte dépasse la valeur totale de l'entreprise. Elle est rachetée en quelques mois."
+Tweet 5 : "On parle toujours du code qu'on écrit. Presque jamais de celui qu'on a oublié de supprimer."
 linkedin_post (150 à 250 mots)
 - Ouverture : une situation concrète en 1 à 2 lignes, sans préambule.
 - Corps : le raisonnement, sauts de ligne fréquents.
