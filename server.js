@@ -201,11 +201,14 @@ RÈGLES ABSOLUES
 - Pas de conclusion qui résume ce qui précède.
 
 twitter_thread (4 à 5 tweets, 240 caractères max chacun)
-- VARIATION DES AMORCES : Interdiction absolue de commencer deux tweets par les mêmes mots ou le même lieu (ex: ne pas répéter "À Athènes" ou "Socrate" au début des phrases).
-- NON-RÉPÉTITION DES FAITS : Chaque tweet fait avancer l'histoire de manière séquentielle. Un fait énoncé dans le tweet 1 ne doit jamais réapparaître dans les tweets suivants.
-- Tweet 1 (Hook) : Un paradoxe ou une affirmation choc. Pas de présentation passive.
-- Tweets suivants : Déroulement d'actions concrètes, une seule idée par tweet.
-- Dernier tweet : Prise de position tranchée.
+STRUCTURE SÉQUENTIELLE STRICTE :
+- Tweet 1 (Hook) : Une affirmation paradoxale sur la FIN ou l'impact de l'histoire. Interdiction de raconter les faits ou de présenter les personnages ici.
+- Tweet 2 (Début) : L'action initiale uniquement (qui fait quoi au départ).
+- Tweet 3 (Conflit) : L'élément perturbateur ou l'accusation.
+- Tweet 4 (Climax) : La décision ou la condamnation.
+- Tweet 5 (Prise de position) : La leçon finale tranchée.
+
+RÈGLE ANTIDOUBLON X : Chaque tweet traite une étape différente. Un mot-clé, un lieu ou une action utilisé dans un tweet ne doit PLUS JAMAIS réapparaître dans les suivants.
 
 linkedin_post (150 à 250 mots)
 - Ouverture : une situation concrète en 1 à 2 lignes, sans préambule.
@@ -213,7 +216,7 @@ linkedin_post (150 à 250 mots)
 - Fin : UNE seule question ouverte, ancrée dans le métier du lecteur. Jamais sur "votre carrière" ou "le monde professionnel d'aujourd'hui".
 
 shorts_script (voix off fluide à lire à voix haute, ~90-100 mots au total)
-- AUCUN TIMECODE, AUCUN CROCHET [0-3s], AUCUN LIBELLÉ. Le texte doit être 100% propre et prêt à être lu directement au micro.
+- AUCUN TIMECODE, AUCUN CROCHET, AUCUN LIBELLÉ. Le texte doit être 100% propre et prêt à être lu au micro.
 - Organise le script en 3 paragraphes distincts séparés par un saut de ligne :
   1. L'accroche (3 secondes / 10 mots max, percutante)
   2. Le développement (20 secondes / ~50 mots, avec l'exemple concret)
