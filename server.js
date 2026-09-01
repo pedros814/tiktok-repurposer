@@ -16,11 +16,9 @@ const __dirname = dirname(__filename);
 
 const PORT = process.env.PORT || 3000;
 const FREE_LIMIT = parseInt(process.env.FREE_LIMIT || '3');
-const PRICE_ID = process.env.STRIPE_PRICE_ID;
 const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const DOMAIN = process.env.DOMAIN || `http://localhost:${PORT}`;
-const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const stripe = Stripe(STRIPE_SECRET);
@@ -98,9 +96,26 @@ function canUse(fingerprint) {
   return { allowed: remaining > 0, remaining, status: 'free', used };
 }
 
+// ========== POST-PROCESSING : DETECTE LES TWEETS FAIBLES ==========
+const BANNED = /\b(imaginez|plongeons|game-?changer|voici pourquoi|qu'en pensez-vous|et si|la plupart des gens pensent|non, ce n'est pas une blague)\b/i;
+
+function tweetFaible(t) {
+  if (!t || t.length > 275) return true;
+  if (BANNED.test(t)) return true;
+  // pas de nom propre, pas de chiffre, pas de guillemet = probablement abstrait
+  return !/[A-ZÀ-Ý][a-zà-ÿ]{2,}/.test(t.slice(1)) && !/\d/.test(t) && !/["«]/.test(t);
+}
+
+function filtrerThread(thread) {
+  return thread.filter((t, i) => {
+    const faible = tweetFaible(t);
+    if (faible) console.log(`[POST-PROC] Tweet ${i} rejete : "${t.substring(0, 60)}..."`);
+    return !faible;
+  });
+}
+
 const app = express();
 
-// ========== STRIPE WEBHOOK (verrouille) ==========
 app.post('/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   if (!STRIPE_WEBHOOK_SECRET) {
     return res.status(500).send('Webhook secret not configured');
@@ -130,8 +145,6 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(join(__dirname, 'public')));
-
-// ========== API ROUTES ==========
 
 app.get('/api/status', (req, res) => {
   const fingerprint = getFingerprint(req);
@@ -173,16 +186,16 @@ app.post('/api/create-checkout-session', async (req, res) => {
   }
 });
 
-// ========== CORE: PROMPT EN 2 ETAPES ==========
+// ========== CORE: PROMPT 2 ETAPES + POST-PROCESSING ==========
 
 async function generateFromText(text, res) {
-  // --- ETAPE 1: ANALYSE (gpt-4o-mini, rapide) ---
+  // --- ETAPE 1: ANALYSE ---
   const analysisCompletion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
         role: 'system',
-        content: `Tu analyses une transcription orale brute. Extrais la substance.\n\nReponds UNIQUEMENT en JSON valide :\n{\n  "these": "l'affirmation principale en une phrase, telle qu'un lecteur la retiendrait",\n  "arguments": ["les 2-4 points qui la soutiennent"],\n  "moment_fort": "la phrase ou l'anecdote la plus marquante, citee telle quelle",\n  "public": "a qui ca parle",\n  "registre": "familier | pro | technique | humoristique"\n}\n\nSi la transcription n'a pas d'idee exploitable (unboxing muet, musique sans parole, etc.), mets these a null.`
+        content: `Tu analyses une transcription orale brute. Extrais la substance.\n\nReponds UNIQUEMENT en JSON valide :\n{\n  "these": "l'affirmation principale en une phrase, telle qu'un lecteur la retiendrait",\n  "scene": "les faits bruts dans l'ordre chronologique : qui fait quoi, ou, quand. Pas d'interpretation.",\n  "arguments": ["les 2-4 points qui la soutiennent"],\n  "moment_fort": "la phrase ou l'anecdote la plus marquante, citee telle quelle",\n  "public": "a qui ca parle",\n  "registre": "familier | pro | technique | humoristique"\n}\n\nSi la transcription n'a pas d'idee exploitable, mets these a null.`
       },
       { role: 'user', content: text }
     ],
@@ -199,28 +212,46 @@ async function generateFromText(text, res) {
     });
   }
 
-  // --- ETAPE 2: GENERATION (gpt-4o, qualite) ---
+  // --- ETAPE 2: GENERATION (ton prompt) ---
   const genCompletion = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [
       {
         role: 'system',
-        content: `Tu ecris pour un createur de contenu. Tu pars d'une analyse, pas d'une transcription : n'essaie jamais de resumer la video, construis un contenu autonome.\n\nRÈGLES ABSOLUES\n- Aucun emoji, sauf si le registre est "humoristique" (max 1 par bloc).\n- Aucune de ces formules : "dans cet article", "plongeons", "il est important de", "voici pourquoi", "game-changer", "spoiler".\n- Phrases courtes. Une idee par phrase.\n- Pas de conclusion qui resume ce qui vient d'etre dit.\n\ntwitter_thread (3 a 5 tweets, 280 car. max chacun)\n- Tweet 1 = le hook. Une affirmation qui cree une tension ou contredit une evidence. Jamais une question rhetorique. Jamais "thread".\n- Tweets suivants = un argument chacun, du concret, des exemples.\n- Dernier tweet = une prise de position, pas un resume.\n\nlinkedin_post (150-250 mots)\n- Ouverture : une situation concrete en 1-2 lignes.\n- Corps : le raisonnement, avec des sauts de ligne frequents.\n- Fin : une question ouverte reelle, pas "qu'en pensez-vous ?".\n\nshorts_script (30-45s a l'oral)\n- Format : [0-3s] hook visuel + phrase / [3-25s] developpement / [25-40s] chute.\n- Ecrit pour etre dit a voix haute, pas lu.\n\nReponds uniquement en JSON : {"twitter_thread": [...], "linkedin_post": "...", "shorts_script": "..."}`
+        content: `Tu ecris pour un createur de contenu. Tu pars d'une analyse, pas d'une transcription : ne resume jamais la video, construis un contenu autonome.\n\nRÈGLES ABSOLUES\n- Aucun emoji, sauf si le registre est "humoristique" (max 1 par bloc).\n- Formules interdites : "dans cet article", "plongeons", "il est important de", "voici pourquoi", "game-changer", "spoiler", "imaginez", "et si", "la plupart des gens pensent", "non, ce n'est pas une blague".\n- Chaque bloc doit contenir des faits : qui fait quoi, ou, quand, dans quel ordre. Un passage qui n'enonce qu'une lecon generale ("l'audace paie", "l'environnement compte") est a reecrire avec la scene concrete a la place.\n- Si plusieurs personnes interviennent, precise toujours qui agit et qui parle. Aucune ambiguite sur le sujet des verbes.\n- Phrases courtes. Une idee par phrase.\n- Pas de conclusion qui resume ce qui vient d'etre dit.\n\ntwitter_thread (3 a 5 tweets, 240 caracteres max chacun)\n- Tweet 1 = le hook. Une affirmation qui cree une tension ou contredit une evidence. Jamais une question rhetorique. Jamais "thread".\n- Tweets suivants = un fait ou une action par tweet, avec un detail precis.\n- Dernier tweet = une prise de position tranchee, pas un resume.\n\nlinkedin_post (150-250 mots)\n- Ouverture : une situation concrete en 1-2 lignes, sans preambule.\n- Corps : le raisonnement, avec des sauts de ligne frequents.\n- Fin : une question ouverte reelle, ancree dans le metier du lecteur. Jamais "qu'en pensez-vous ?" ni une question sur "votre carriere".\n\nshorts_script (ecrit pour etre dit a voix haute, ~2,5 mots par seconde)\n- [0-3s] hook : 8 mots maximum.\n- [3-25s] developpement : 45 a 55 mots, avec un exemple concret.\n- [25-40s] chute ou contre-pied : 30 a 40 mots.\n\nReponds uniquement en JSON : {"twitter_thread": [...], "linkedin_post": "...", "shorts_script": "..."}`
       },
       {
         role: 'user',
-        content: `Analyse du contenu source :\n\nThese : ${analysis.these}\nArguments : ${analysis.arguments.join(' | ')}\nMoment fort : ${analysis.moment_fort}\nPublic : ${analysis.public}\nRegistre : ${analysis.registre}\n\nGenere les 3 formats.`
+        content: `Analyse du contenu source :\n\nThese : ${analysis.these}\nScene (faits bruts, dans l'ordre) : ${analysis.scene || 'non fournie'}\nArguments : ${(analysis.arguments || []).join(' | ')}\nMoment fort : ${analysis.moment_fort || '-'}\nPublic : ${analysis.public}\nRegistre : ${analysis.registre}\n\nGenere les 3 formats.`
       }
     ],
     response_format: { type: 'json_object' },
-    temperature: 0.7
+    temperature: 0.8
   });
 
   const raw = genCompletion.choices[0].message.content;
   const clean = raw.replace(/```json|```/g, '').trim();
   const result = JSON.parse(clean);
+
+  // --- POST-PROCESSING : FILTRE LES TWEETS FAIBLES ---
+  if (Array.isArray(result.twitter_thread)) {
+    const avant = result.twitter_thread.length;
+    result.twitter_thread = filtrerThread(result.twitter_thread);
+    const apres = result.twitter_thread.length;
+    if (apres < avant) {
+      console.log(`[POST-PROC] ${avant - apres} tweet(s) rejete(s), ${apres} conserve(s)`);
+    }
+    // Si moins de 3 tweets restent, c'est trop peu
+    if (result.twitter_thread.length < 3) {
+      return res.status(422).json({
+        error: 'QUALITE_INSUFFISANTE',
+        message: 'Le contenu genere n\'est pas assez solide. Essaye avec une video plus riche en faits et en anecdotes.'
+      });
+    }
+  }
+
   result.transcript = text;
-  result._analysis = analysis; // debug
+  result._analysis = analysis;
   res.json(result);
 }
 
@@ -252,10 +283,9 @@ app.post('/from-audio', async (req, res) => {
   const { filename, data } = req.body;
   if (!data) return res.status(400).json({ error: 'Aucun fichier recu' });
 
-  // Verif taille (Whisper limite a ~25Mo)
   const sizeMB = (data.length * 0.75) / 1024 / 1024;
   if (sizeMB > 25) {
-    return res.status(413).json({ error: 'Fichier trop lourd (max 25 Mo). Compresse l\'audio ou coupe en morceaux.' });
+    return res.status(413).json({ error: 'Fichier trop lourd (max 25 Mo).' });
   }
 
   const uid = randomUUID().slice(0, 8);
@@ -273,16 +303,14 @@ app.post('/from-audio', async (req, res) => {
 
     fs.unlinkSync(audioPath);
 
-    // Verif longueur transcription
     if (!transcription.text || transcription.text.trim().length < 20) {
-      return res.status(422).json({ error: 'TRANSCRIPTION_VIDE', message: 'L\'audio ne contient pas assez de parole. Assure-toi que la video a du son clair.' });
+      return res.status(422).json({ error: 'TRANSCRIPTION_VIDE', message: 'L\'audio ne contient pas assez de parole.' });
     }
 
     await generateFromText(transcription.text, res);
     upsertUsageStmt.run(fingerprint);
   } catch (err) {
     if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
-    console.error('API Error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -291,5 +319,4 @@ app.listen(PORT, () => {
   console.log(`Server: http://localhost:${PORT}`);
   console.log(`DB: ${DB_PATH}`);
   console.log(`Stripe: ${STRIPE_SECRET ? 'OK' : 'NON CONFIGURE'}`);
-  console.log(`Env: ${NODE_ENV}`);
 });
