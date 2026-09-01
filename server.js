@@ -191,20 +191,19 @@ Réponds UNIQUEMENT en JSON :
 }
 
 Pour "verification" : ne signale que ce qui mérite un doute (attribution contestée, chiffre invraisemblable, anecdote connue pour être apocryphe). Tableau vide si tout est solide.`;
-
 const PROMPT_GENERATION = `Tu écris pour un créateur de contenu. Tu construis un contenu autonome, tu ne résumes jamais la vidéo.
 
 RÈGLES ABSOLUES
 - Zéro hashtag. Zéro emoji.
 - Formules interdites : "plongeons", "voici pourquoi", "game-changer", "imaginez", "et si", "la plupart des gens pensent", "dans cet article", "il est important de".
-- Chaque bloc doit contenir des faits : qui fait quoi, où, quand, combien. Un passage qui n'énonce qu'une leçon générale ("l'audace paie", "il a marqué la pensée") est à réécrire avec la scène concrète à la place.
-- Si plusieurs personnes interviennent, précise toujours qui agit et qui parle.
-- Phrases courtes. Une idée par phrase.
+- Chaque bloc doit contenir des faits concrets : qui fait quoi, où, quand, combien.
+- Phrases courtes et percutantes. Une idée par phrase.
 - Pas de conclusion qui résume ce qui précède.
 
 twitter_thread (4 à 5 tweets, 240 caractères max chacun)
-- Tweet 1 : le hook. Une affirmation qui crée une tension ou contredit une évidence. Jamais une question rhétorique, jamais le mot "thread".
-- Tweets suivants : un fait ou une action par tweet, avec un détail précis tiré de la source.
+- NON-RÉPÉTITION ABSOLUE : Chaque tweet doit apporter un événement ou un fait strictement NOUVEAU. Interdiction formelle de répéter les mêmes mots-clés, lieux, actions ou faits d'un tweet à l'autre (ex: ne jamais répéter "marchait pieds nus dans Athènes").
+- Tweet 1 : le hook. Une affirmation forte qui crée une tension ou contredit une idée reçue. Jamais de question rhétorique, jamais le mot "thread".
+- Tweets suivants : un fait précis ou une action chronologique par tweet.
 - Dernier tweet : une prise de position tranchée.
 
 linkedin_post (150 à 250 mots)
@@ -212,11 +211,12 @@ linkedin_post (150 à 250 mots)
 - Corps : le raisonnement, sauts de ligne fréquents.
 - Fin : UNE seule question ouverte, ancrée dans le métier du lecteur. Jamais sur "votre carrière" ou "le monde professionnel d'aujourd'hui".
 
-shorts_script (écrit pour être dit à voix haute, ~2,5 mots par seconde)
-- [0-3s] hook : 8 mots maximum.
-- [3-25s] développement : 45 à 55 mots, avec un exemple concret.
-- [25-40s] chute ou contre-pied : 30 à 40 mots.
-- Les trois timecodes doivent apparaître littéralement.
+shorts_script (voix off fluide à lire à voix haute, ~90-100 mots au total)
+- AUCUN TIMECODE, AUCUN CROCHET [0-3s], AUCUN LIBELLÉ. Le texte doit être 100% propre et prêt à être lu directement au micro.
+- Organise le script en 3 paragraphes distincts séparés par un saut de ligne :
+  1. L'accroche (3 secondes / 10 mots max, percutante)
+  2. Le développement (20 secondes / ~50 mots, avec l'exemple concret)
+  3. La chute (15 secondes / ~30 mots, contre-pied ou conclusion forte)
 
 SORTIE JSON : {"twitter_thread": [...], "linkedin_post": "...", "shorts_script": "..."}`;
 
