@@ -196,7 +196,7 @@ Pour "verification" : ne signale que ce qui mérite un doute (attribution contes
 const PROMPT_GENERATION = `Tu écris pour un créateur de contenu. Tu construis un contenu autonome, tu ne résumes jamais la vidéo.
 
 RÈGLES ABSOLUES
-- Écris toujours en français, quelle que soit la langue de la source.
+
 - Zéro hashtag. Zéro emoji.
 - Formules interdites : "plongeons", "voici pourquoi", "game-changer", "imaginez", "et si", "la plupart des gens pensent", "dans cet article", "il est important de".
 - Chaque bloc doit contenir des faits concrets (qui, quoi, où, quand).
