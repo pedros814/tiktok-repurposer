@@ -1,144 +1,233 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TikTok Repurposer — 1 vidéo, 3 formats viraux</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0a0a0a; color: #fff;
-    }
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ricochet — une vidéo, trois formats écrits</title>
+<meta name="description" content="Transforme une vidéo en thread, post LinkedIn et script Shorts. Le texte sort prêt à publier, pas à réécrire.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F0EFE9;
+  --paper-2:#F8F7F3;
+  --ink:#1A1B16;
+  --ink-soft:#5F6157;
+  --rule:#D7D5CB;
+  --mark:#E2F25C;
+  --mark-deep:#C7D93B;
+  --flag:#B5431F;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Newsreader',Georgia,serif;
+  font-size:18px;
+  line-height:1.65;
+  font-optical-sizing:auto;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+h1,h2,h3,.ui{font-family:'Archivo',system-ui,sans-serif;font-weight:600;line-height:1.1;letter-spacing:-0.02em}
 
-    /* NAV */
-    nav { padding: 20px 0; display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-size: 1.3rem; font-weight: 700; background: linear-gradient(90deg, #ff0050, #00f2ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    nav a { color: #fff; text-decoration: none; font-size: 0.95rem; }
-    nav a.cta-nav {
-      background: linear-gradient(90deg, #ff0050, #ff4081); padding: 10px 24px;
-      border-radius: 10px; font-weight: 600;
-    }
+.top{display:flex;align-items:baseline;justify-content:space-between;padding:22px 0;border-bottom:1px solid var(--rule)}
+.brand{font-family:'Archivo',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.03em}
+.brand em{font-style:normal;background:var(--mark);padding:0 3px}
+.top a{font-family:'Archivo',sans-serif;font-size:15px;font-weight:500;color:var(--ink);text-decoration:none;border-bottom:2px solid var(--mark-deep);padding-bottom:1px}
 
-    /* HERO */
-    .hero { text-align: center; padding: 80px 20px 60px; }
-    .hero h1 { font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
-    .hero h1 span { background: linear-gradient(90deg, #ff0050, #00f2ea); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .hero p { color: #aaa; font-size: 1.25rem; max-width: 600px; margin: 0 auto 40px; line-height: 1.6; }
-    .hero .cta {
-      display: inline-block; padding: 18px 48px; border-radius: 14px; border: none;
-      background: linear-gradient(90deg, #ff0050, #ff4081); color: #fff;
-      font-weight: 700; font-size: 1.1rem; text-decoration: none; cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .hero .cta:hover { transform: scale(1.05); }
-    .hero .sub-cta { margin-top: 16px; color: #666; font-size: 0.9rem; }
+.hero{padding:64px 0 40px;max-width:38ch}
+.hero h1{font-size:clamp(38px,6vw,60px);margin-bottom:20px}
+.hero p{color:var(--ink-soft);font-size:20px;max-width:34ch}
 
-    /* STEPS */
-    .steps { padding: 60px 20px; }
-    .steps h2 { text-align: center; font-size: 2rem; margin-bottom: 50px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-    .step-card {
-      background: #1a1a1a; border-radius: 20px; padding: 40px 30px; border: 1px solid #222;
-      text-align: center; transition: transform 0.2s;
-    }
-    .step-card:hover { transform: translateY(-4px); border-color: #333; }
-    .step-card .icon { font-size: 3rem; margin-bottom: 20px; }
-    .step-card h3 { font-size: 1.3rem; margin-bottom: 12px; }
-    .step-card p { color: #888; line-height: 1.6; }
+.demo{display:grid;grid-template-columns:0.85fr 1.15fr;gap:0;border:1px solid var(--ink);background:var(--paper-2);margin-bottom:12px}
+.pane{padding:26px}
+.pane.src{border-right:1px solid var(--ink);background:var(--paper)}
+.pane-h{font-family:'Archivo',sans-serif;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:14px}
+.src p{font-size:16px;line-height:1.7;color:var(--ink-soft)}
+mark{background:var(--mark);color:var(--ink);padding:1px 2px}
 
-    /* PRICING */
-    .pricing { padding: 60px 20px; text-align: center; }
-    .pricing h2 { font-size: 2rem; margin-bottom: 40px; }
-    .price-card {
-      background: #1a1a1a; border-radius: 24px; padding: 50px 40px; border: 1px solid #333;
-      max-width: 420px; margin: 0 auto;
-    }
-    .price-card .name { color: #888; font-size: 1rem; margin-bottom: 10px; }
-    .price-card .amount {
-      font-size: 4rem; font-weight: 800;
-      background: linear-gradient(90deg, #ff0050, #00f2ea);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .price-card .amount span { font-size: 1rem; color: #888; -webkit-text-fill-color: #888; font-weight: 400; }
-    .price-card ul { text-align: left; list-style: none; margin: 30px 0; }
-    .price-card ul li { padding: 10px 0; color: #ccc; border-bottom: 1px solid #222; }
-    .price-card ul li::before { content: "✓"; color: #00f2ea; margin-right: 10px; font-weight: bold; }
-    .price-card .cta {
-      display: block; width: 100%; padding: 16px; border-radius: 12px; border: none;
-      background: linear-gradient(90deg, #ff0050, #ff4081); color: #fff;
-      font-weight: 700; font-size: 1.1rem; text-decoration: none; cursor: pointer;
-    }
+.run{display:block;width:100%;margin-top:22px;padding:13px;border:1px solid var(--ink);background:var(--mark);
+  font-family:'Archivo',sans-serif;font-weight:600;font-size:15px;color:var(--ink);cursor:pointer}
+.run:hover{background:var(--mark-deep)}
+.run:disabled{background:transparent;color:var(--ink-soft);cursor:default}
+.run:focus-visible,a:focus-visible,button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
-    /* FOOTER */
-    footer { text-align: center; padding: 40px 20px; color: #555; font-size: 0.85rem; border-top: 1px solid #1a1a1a; margin-top: 40px; }
-  </style>
+.tabs{display:flex;gap:18px;margin-bottom:18px;border-bottom:1px solid var(--rule)}
+.tab{font-family:'Archivo',sans-serif;font-size:14px;font-weight:500;background:none;border:0;padding:0 0 9px;
+  color:var(--ink-soft);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+
+.out{min-height:330px}
+.stage{color:var(--ink-soft);font-size:16px}
+.stage span{display:block;opacity:.25}
+.stage span.on{opacity:1}
+.stage span.done{opacity:.4}
+.tweet{padding:12px 0;border-bottom:1px solid var(--rule);font-size:16.5px}
+.tweet:last-child{border:0}
+.body-out{white-space:pre-wrap;font-size:16.5px}
+.hidden{display:none}
+
+section{padding:52px 0;border-top:1px solid var(--rule)}
+section h2{font-size:28px;margin-bottom:26px}
+.pts{display:grid;gap:26px;max-width:70ch}
+.pt{display:grid;grid-template-columns:150px 1fr;gap:24px;align-items:start}
+.pt dt{font-family:'Archivo',sans-serif;font-size:15px;font-weight:600;padding-top:3px}
+.pt dd{color:var(--ink-soft);font-size:17px}
+.no li{list-style:none;padding:9px 0 9px 26px;position:relative;color:var(--ink-soft);max-width:62ch;border-bottom:1px solid var(--rule)}
+.no li:before{content:"—";position:absolute;left:0;color:var(--ink)}
+
+.price{display:flex;gap:56px;align-items:flex-start;flex-wrap:wrap}
+.price .amt{font-family:'Archivo',sans-serif;font-size:52px;font-weight:700;letter-spacing:-0.04em;line-height:1}
+.price .amt small{font-family:'Newsreader',serif;font-size:17px;font-weight:400;color:var(--ink-soft);letter-spacing:0}
+.cta{display:inline-block;margin-top:20px;padding:14px 30px;background:var(--ink);color:var(--paper);
+  font-family:'Archivo',sans-serif;font-weight:600;font-size:16px;text-decoration:none}
+.cta:hover{background:#000}
+.price ul{list-style:none;font-size:17px;color:var(--ink-soft)}
+.price ul li{padding:5px 0}
+foot,footer{display:block;padding:28px 0 44px;border-top:1px solid var(--rule);font-size:15px;color:var(--ink-soft)}
+
+@media (max-width:820px){
+  body{font-size:17px}
+  .demo{grid-template-columns:1fr}
+  .pane.src{border-right:0;border-bottom:1px solid var(--ink)}
+  .pt{grid-template-columns:1fr;gap:6px}
+  .hero{padding:44px 0 32px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
 <base target="_blank">
 </head>
 <body>
-  <div class="container">
-    <nav>
-      <div class="logo">🚀 TikTok Repurposer</div>
-      <a href="/app.html" class="cta-nav">Essayer gratuitement</a>
-    </nav>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Ric<em>o</em>chet</div>
+    <a href="/app.html?src=landing">Essayer</a>
+  </header>
+
+  <div class="hero">
+    <h1>Une vidéo. Trois textes que tu n'auras pas à réécrire.</h1>
+    <p>Tu filmes une fois. Le thread, le post LinkedIn et le script Shorts sortent d'ici, prêts à publier.</p>
   </div>
 
-  <section class="hero">
-    <div class="container">
-      <h1>1 vidéo TikTok.<br><span>3 formats viraux.</span><br>En 10 secondes.</h1>
-      <p>Upload l'audio de ta vidéo ou colle la transcription. Reçois instantanément un thread Twitter, un post LinkedIn et un script YouTube Shorts prêts à publier.</p>
-      <a href="/app.html" class="cta">🚀 Essayer gratuitement — 3 générations</a>
-      <p class="sub-cta">Puis 9.90€/mois pour l'illimité. Annulation à tout moment.</p>
+  <div class="demo">
+    <div class="pane src">
+      <div class="pane-h">Transcription brute — vidéo de 4 min</div>
+      <p>...enfin bref, l'histoire elle est dingue, en gros <mark>le mec vient d'avoir le prix Nobel</mark>, il fait la tournée des universités avec toujours le même discours, et <mark>son chauffeur l'écoutait depuis l'avant de la bagnole</mark>, genre trente fois. Et un jour il propose de le faire à sa place. Et ça passe, <mark>personne dans la salle ne remarque rien</mark>. Sauf qu'à la fin <mark>un prof pose une vraie question</mark>, et là le chauffeur, au lieu de paniquer, il dit que la question est trop simple pour lui et <mark>il la renvoie à son chauffeur au fond de la salle</mark>...</p>
+      <button class="run" id="run">Générer les trois formats</button>
     </div>
-  </section>
 
-  <section class="steps">
-    <div class="container">
-      <h2>Comment ça marche ?</h2>
-      <div class="grid">
-        <div class="step-card">
-          <div class="icon">🎵</div>
-          <h3>1. Upload ton audio</h3>
-          <p>Télécharge l'audio de ta vidéo TikTok (MP3, M4A, WAV) ou colle directement la transcription.</p>
+    <div class="pane">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-p="tw">Thread X</button>
+        <button class="tab" role="tab" aria-selected="false" data-p="li">LinkedIn</button>
+        <button class="tab" role="tab" aria-selected="false" data-p="sh">Shorts</button>
+      </div>
+
+      <div class="out" id="out">
+        <div class="stage" id="stage">
+          <span data-s="0">Transcription de l'audio</span>
+          <span data-s="1">Repérage des faits et du moment fort</span>
+          <span data-s="2">Écriture des trois formats</span>
         </div>
-        <div class="step-card">
-          <div class="icon">⚡</div>
-          <h3>2. L'IA génère</h3>
-          <p>Notre IA analyse ton contenu et crée 3 formats optimisés pour le viral sur chaque plateforme.</p>
-        </div>
-        <div class="step-card">
-          <div class="icon">📋</div>
-          <h3>3. Copie et publie</h3>
-          <p>Copie en 1 clic ton thread Twitter, ton post LinkedIn ou ton script Shorts. C'est prêt.</p>
+
+        <div id="panes" class="hidden">
+          <div data-pane="tw">
+            <div class="tweet">Un chauffeur a donné une conférence de physique à la place de son patron, prix Nobel. Dans la salle, des universitaires. Personne n'a rien remarqué.</div>
+            <div class="tweet">Il n'avait rien étudié. Il avait entendu le même discours une trentaine de fois depuis le siège avant. La répétition passive a fait le travail d'un semestre.</div>
+            <div class="tweet">Un professeur pose une question technique. Il ne bluffe pas et ne se rétracte pas. Il répond qu'elle est si simple qu'il va laisser son chauffeur y répondre. Le vrai savant, au fond de la salle, s'exécute.</div>
+            <div class="tweet">Ce qui l'a formé n'est pas un cursus. C'est trois ans dans la même voiture qu'un homme qui réfléchissait à voix haute. Personne ne met ça sur un CV.</div>
+            <div class="tweet">La plupart des gens qu'on écoute parler ont le savoir du chauffeur. Ça ne les disqualifie pas eux. Ça disqualifie notre façon de reconnaître qui sait vraiment quelque chose.</div>
+          </div>
+          <div data-pane="li" class="hidden"><div class="body-out">Un chauffeur monte sur scène à la place d'un prix Nobel. Il donne la conférence en entier. La salle applaudit.
+
+Il connaissait le discours pour l'avoir entendu une trentaine de fois en conduisant. Rien d'autre.
+
+Ce qui m'intéresse ici, ce n'est pas le culot. C'est le moment où un professeur pose une vraie question et où il tient quand même.
+
+Il n'improvise pas une réponse qu'il n'a pas. Il renvoie la question au fond de la salle, à son patron, en disant qu'elle est trop simple pour lui.
+
+Il connaissait précisément la limite de ce qu'il savait. C'est plus rare que la compétence elle-même.
+
+Dans votre métier, à quoi reconnaissez-vous quelqu'un qui sait, par rapport à quelqu'un qui répète bien ?</div></div>
+          <div data-pane="sh" class="hidden"><div class="body-out">[0-3s] Face caméra, sans intro.
+« Un chauffeur a donné une conférence de physique à la place de son patron. »
+
+[3-25s] « Son patron venait d'avoir le prix Nobel. Il faisait la tournée des universités avec le même discours. Le chauffeur l'entendait à chaque trajet. Au bout de trente fois, il le connaissait mieux que les étudiants dans la salle. Un soir, il propose de le donner à sa place. Ça passe. »
+
+[25-40s] « Le truc, c'est pas d'avoir récité. C'est ce qu'il fait quand un prof pose une vraie question. Il ne bluffe pas. Il dit qu'elle est trop simple, et il la renvoie à son chauffeur au fond de la salle. Il savait exactement où s'arrêtait ce qu'il savait. »</div></div>
         </div>
       </div>
     </div>
+  </div>
+
+  <section>
+    <h2>Ce qui sort d'ici et pas d'un chatbot</h2>
+    <dl class="pts">
+      <div class="pt"><dt>Deux passages</dt><dd>Les faits de la vidéo sont extraits d'abord, les formats écrits ensuite. Le texte raconte la scène au lieu de résumer la vidéo.</dd></div>
+      <div class="pt"><dt>Zéro tell d'IA</dt><dd>Pas d'emoji, pas de « plongeons dans », pas de question rhétorique en ouverture. Un tweet qui n'énonce qu'une leçon générale est réécrit avant de t'être montré.</dd></div>
+      <div class="pt"><dt>Les points fragiles</dt><dd>Les affirmations invérifiables sont signalées avant que tu publies. Comme celle du dessus.</dd></div>
+      <div class="pt"><dt>Ton style</dt><dd>Chaque fois que tu corriges un texte, la correction est retenue. Au bout de quelques vidéos, les sorties arrivent déjà écrites comme toi.</dd></div>
+    </dl>
   </section>
 
-  <section class="pricing">
-    <div class="container">
-      <h2>Prix simple, pas de surprise</h2>
-      <div class="price-card">
-        <div class="name">Pro — Accès illimité</div>
-        <div class="amount">9.90€ <span>/ mois</span></div>
-        <ul>
-          <li>Générations illimitées</li>
-          <li>Audio + Texte</li>
-          <li>Thread Twitter, LinkedIn, Shorts</li>
-          <li>Copie 1-clic</li>
-          <li>Support prioritaire</li>
-          <li>Annulation à tout moment</li>
-        </ul>
-        <a href="/app.html" class="cta">Commencer — 3 essais gratuits</a>
+  <section>
+    <h2>Ce que Ricochet ne fait pas</h2>
+    <ul class="no">
+      <li>Publier à ta place. Tu relis, tu ajustes, tu postes.</li>
+      <li>Trouver des idées. Il travaille sur ce que tu as déjà dit.</li>
+      <li>Rendre viral quoi que ce soit. Une vidéo sans propos donne trois textes sans propos.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="price">
+      <div>
+        <div class="amt">9.90 €<small> / mois</small></div>
+        <a class="cta" href="/app.html?src=landing">Commencer — 3 essais gratuits</a>
       </div>
+      <ul>
+        <li>Vidéo ou audio, jusqu'à 30 minutes</li>
+        <li>Générations sans limite</li>
+        <li>Historique de tes textes</li>
+        <li>Résiliable en un clic</li>
+      </ul>
     </div>
   </section>
 
-  <footer>
-    <div class="container">
-      © 2026 TikTok Repurposer. Propulsé par OpenAI & Stripe.
-    </div>
-  </footer>
+  <footer>Ricochet — <a href="mailto:bonjour@ricochet.app" style="color:inherit">bonjour@ricochet.app</a></footer>
+</div>
+
+<script>
+(function(){
+  var run=document.getElementById('run'),stage=document.getElementById('stage'),
+      panes=document.getElementById('panes'),done=false;
+
+  function reveal(){
+    if(done)return; done=true;
+    run.disabled=true; run.textContent='Généré en 14 s';
+    var i=0;
+    (function next(){
+      if(i>0)steps[i-1].classList.replace('on','done');
+      if(i<steps.length){steps[i].classList.add('on');i++;setTimeout(next,900);}
+      else{stage.classList.add('hidden');panes.classList.remove('hidden');}
+    })();
+  }
+  run.addEventListener('click',reveal);
+
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.setAttribute('aria-selected','false')});
+      t.setAttribute('aria-selected','true');
+      document.querySelectorAll('[data-pane]').forEach(function(p){
+        p.classList.toggle('hidden',p.dataset.pane!==t.dataset.p);
+      });
+      reveal();
+    });
+  });
+})();
+</script>
 </body>
 </html>

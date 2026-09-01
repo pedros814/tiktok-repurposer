@@ -96,13 +96,12 @@ function canUse(fingerprint) {
   return { allowed: remaining > 0, remaining, status: 'free', used };
 }
 
-// ========== POST-PROCESSING : DETECTE LES TWEETS FAIBLES ==========
+// ========== POST-PROCESSING ==========
 const BANNED = /\b(imaginez|plongeons|game-?changer|voici pourquoi|qu'en pensez-vous|et si|la plupart des gens pensent|non, ce n'est pas une blague)\b/i;
 
 function tweetFaible(t) {
   if (!t || t.length > 275) return true;
   if (BANNED.test(t)) return true;
-  // pas de nom propre, pas de chiffre, pas de guillemet = probablement abstrait
   return !/[A-ZÀ-Ý][a-zà-ÿ]{2,}/.test(t.slice(1)) && !/\d/.test(t) && !/["«]/.test(t);
 }
 
@@ -116,6 +115,7 @@ function filtrerThread(thread) {
 
 const app = express();
 
+// ========== STRIPE WEBHOOK (verrouille) ==========
 app.post('/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   if (!STRIPE_WEBHOOK_SECRET) {
     return res.status(500).send('Webhook secret not configured');
@@ -146,6 +146,8 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(join(__dirname, 'public')));
 
+// ========== API ROUTES ==========
+
 app.get('/api/status', (req, res) => {
   const fingerprint = getFingerprint(req);
   const quota = canUse(fingerprint);
@@ -170,7 +172,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
       line_items: [{
         price_data: {
           currency: 'eur',
-          product_data: { name: 'TikTok Repurposer Pro' },
+          product_data: { name: 'Ricochet Pro' },
           unit_amount: 990,
         },
         quantity: 1,
@@ -212,7 +214,7 @@ async function generateFromText(text, res) {
     });
   }
 
-  // --- ETAPE 2: GENERATION (ton prompt) ---
+  // --- ETAPE 2: GENERATION ---
   const genCompletion = await openai.chat.completions.create({
     model: 'gpt-4o',
     messages: [
@@ -233,15 +235,12 @@ async function generateFromText(text, res) {
   const clean = raw.replace(/```json|```/g, '').trim();
   const result = JSON.parse(clean);
 
-  // --- POST-PROCESSING : FILTRE LES TWEETS FAIBLES ---
+  // Post-processing
   if (Array.isArray(result.twitter_thread)) {
     const avant = result.twitter_thread.length;
     result.twitter_thread = filtrerThread(result.twitter_thread);
     const apres = result.twitter_thread.length;
-    if (apres < avant) {
-      console.log(`[POST-PROC] ${avant - apres} tweet(s) rejete(s), ${apres} conserve(s)`);
-    }
-    // Si moins de 3 tweets restent, c'est trop peu
+    if (apres < avant) console.log(`[POST-PROC] ${avant - apres} tweet(s) rejete(s)`);
     if (result.twitter_thread.length < 3) {
       return res.status(422).json({
         error: 'QUALITE_INSUFFISANTE',
