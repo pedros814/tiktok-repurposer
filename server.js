@@ -96,7 +96,6 @@ function canUse(fingerprint) {
   return { allowed: remaining > 0, remaining, status: 'free', used };
 }
 
-// ========== POST-PROCESSING ==========
 const BANNED = /\b(imaginez|plongeons|game-?changer|voici pourquoi|qu'en pensez-vous|et si|la plupart des gens pensent|non, ce n'est pas une blague)\b/i;
 
 function tweetFaible(t) {
@@ -113,9 +112,37 @@ function filtrerThread(thread) {
   });
 }
 
+// ========== PARSER JSON ROBUSTE ==========
+function parseJSONRobuste(raw) {
+  if (!raw) return null;
+  let clean = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+  try {
+    return JSON.parse(clean);
+  } catch (e) {
+    const firstBrace = clean.indexOf('{');
+    const lastBrace = clean.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      const extracted = clean.substring(firstBrace, lastBrace + 1);
+      try {
+        return JSON.parse(extracted);
+      } catch (e2) {
+        const fixed = extracted.replace(/,\s*([}\]])/g, '$1');
+        try {
+          return JSON.parse(fixed);
+        } catch (e3) {
+          console.error('[JSON] Echec parsing:', e3.message);
+          console.error('[JSON] Brut:', raw.substring(0, 300));
+          return null;
+        }
+      }
+    }
+    console.error('[JSON] Aucun JSON trouve:', raw.substring(0, 300));
+    return null;
+  }
+}
+
 const app = express();
 
-// ========== STRIPE WEBHOOK (verrouille) ==========
 app.post('/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   if (!STRIPE_WEBHOOK_SECRET) {
     return res.status(500).send('Webhook secret not configured');
@@ -145,8 +172,6 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(join(__dirname, 'public')));
-
-// ========== API ROUTES ==========
 
 app.get('/api/status', (req, res) => {
   const fingerprint = getFingerprint(req);
@@ -188,52 +213,69 @@ app.post('/api/create-checkout-session', async (req, res) => {
   }
 });
 
-// ========== CORE: PROMPT 2 ETAPES + POST-PROCESSING ==========
+// ========== CORE: GENERATION ==========
 
 async function generateFromText(text, res) {
-  // --- ETAPE 1: ANALYSE ---
-  const analysisCompletion = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: `Tu analyses une transcription orale brute. Extrais la substance.\n\nReponds UNIQUEMENT en JSON valide :\n{\n  "these": "l'affirmation principale en une phrase, telle qu'un lecteur la retiendrait",\n  "scene": "les faits bruts dans l'ordre chronologique : qui fait quoi, ou, quand. Pas d'interpretation.",\n  "arguments": ["les 2-4 points qui la soutiennent"],\n  "moment_fort": "la phrase ou l'anecdote la plus marquante, citee telle quelle",\n  "public": "a qui ca parle",\n  "registre": "familier | pro | technique | humoristique"\n}\n\nSi la transcription n'a pas d'idee exploitable, mets these a null.`
-      },
-      { role: 'user', content: text }
-    ],
-    response_format: { type: 'json_object' }
-  });
+  console.log(`[GEN] Starting, text length: ${text.length}`);
 
-  const analysisRaw = analysisCompletion.choices[0].message.content;
-  const analysis = JSON.parse(analysisRaw.replace(/```json|```/g, '').trim());
+  // ETAPE 1: ANALYSE
+  console.log('[GEN] Step 1: Analysis...');
+  let analysis;
+  try {
+    const analysisCompletion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `Tu analyses une transcription orale brute. Extrais la substance.\n\nReponds UNIQUEMENT en JSON valide :\n{\n  "these": "l'affirmation principale en une phrase",\n  "scene": "les faits bruts dans l'ordre : qui fait quoi, ou, quand",\n  "arguments": ["les 2-4 points"],\n  "moment_fort": "la phrase la plus marquante",\n  "public": "a qui ca parle",\n  "registre": "familier | pro | technique | humoristique"\n}\n\nSi pas d'idee exploitable, mets these a null.`
+        },
+        { role: 'user', content: text }
+      ],
+      response_format: { type: 'json_object' }
+    });
+
+    analysis = parseJSONRobuste(analysisCompletion.choices[0].message.content);
+    if (!analysis) throw new Error('Analyse: JSON invalide');
+    console.log(`[GEN] Analysis: ${analysis.these ? 'OK' : 'EMPTY'}`);
+  } catch (err) {
+    console.error('[GEN] Erreur analyse:', err.message);
+    return res.status(500).json({ error: 'Erreur analyse du contenu. Reessaie.' });
+  }
 
   if (!analysis.these) {
     return res.status(422).json({
       error: 'CONTENU_INSUFFISANT',
-      message: 'Cette video ne contient pas assez de matiere pour en faire un contenu ecrit. Essaye avec une video ou le locuteur developpe une idee, raconte une histoire ou donne des conseils.'
+      message: 'Cette video ne contient pas assez de matiere. Essaye avec une video ou le locuteur developpe une idee ou raconte une histoire.'
     });
   }
 
-  // --- ETAPE 2: GENERATION ---
-  const genCompletion = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    messages: [
-      {
-        role: 'system',
-        content: `Tu ecris pour un createur de contenu. Tu pars d'une analyse, pas d'une transcription : ne resume jamais la video, construis un contenu autonome.\n\nRÈGLES ABSOLUES\n- Aucun emoji, sauf si le registre est "humoristique" (max 1 par bloc).\n- Formules interdites : "dans cet article", "plongeons", "il est important de", "voici pourquoi", "game-changer", "spoiler", "imaginez", "et si", "la plupart des gens pensent", "non, ce n'est pas une blague".\n- Chaque bloc doit contenir des faits : qui fait quoi, ou, quand, dans quel ordre. Un passage qui n'enonce qu'une lecon generale ("l'audace paie", "l'environnement compte") est a reecrire avec la scene concrete a la place.\n- Si plusieurs personnes interviennent, precise toujours qui agit et qui parle. Aucune ambiguite sur le sujet des verbes.\n- Phrases courtes. Une idee par phrase.\n- Pas de conclusion qui resume ce qui vient d'etre dit.\n\ntwitter_thread (3 a 5 tweets, 240 caracteres max chacun)\n- Tweet 1 = le hook. Une affirmation qui cree une tension ou contredit une evidence. Jamais une question rhetorique. Jamais "thread".\n- Tweets suivants = un fait ou une action par tweet, avec un detail precis.\n- Dernier tweet = une prise de position tranchee, pas un resume.\n\nlinkedin_post (150-250 mots)\n- Ouverture : une situation concrete en 1-2 lignes, sans preambule.\n- Corps : le raisonnement, avec des sauts de ligne frequents.\n- Fin : une question ouverte reelle, ancree dans le metier du lecteur. Jamais "qu'en pensez-vous ?" ni une question sur "votre carriere".\n\nshorts_script (ecrit pour etre dit a voix haute, ~2,5 mots par seconde)\n- [0-3s] hook : 8 mots maximum.\n- [3-25s] developpement : 45 a 55 mots, avec un exemple concret.\n- [25-40s] chute ou contre-pied : 30 a 40 mots.\n\nReponds uniquement en JSON : {"twitter_thread": [...], "linkedin_post": "...", "shorts_script": "..."}`
-      },
-      {
-        role: 'user',
-        content: `Analyse du contenu source :\n\nThese : ${analysis.these}\nScene (faits bruts, dans l'ordre) : ${analysis.scene || 'non fournie'}\nArguments : ${(analysis.arguments || []).join(' | ')}\nMoment fort : ${analysis.moment_fort || '-'}\nPublic : ${analysis.public}\nRegistre : ${analysis.registre}\n\nGenere les 3 formats.`
-      }
-    ],
-    response_format: { type: 'json_object' },
-    temperature: 0.8
-  });
+  // ETAPE 2: GENERATION
+  console.log('[GEN] Step 2: Writing...');
+  let result;
+  try {
+    const genCompletion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: `Tu ecris du contenu viral. Tu pars d'une analyse, pas d'une transcription : ne resume jamais, construis.\n\nRÈGLES ABSOLUES\n- ZERO hashtag. ZERO emoji.\n- Formules interdites : "plongeons", "voici pourquoi", "game-changer", "imaginez", "et si", "la plupart des gens pensent".\n- Chaque bloc doit contenir des faits : qui fait quoi, ou, quand.\n- Phrases courtes. Une idee par phrase.\n- Pas de conclusion qui resume.\n\ntwitter_thread (3-5 tweets, 240c max)\n- Tweet 1 = hook. Affirmation qui cree tension. Jamais question rhetorique.\n- Tweets suivants = un fait ou action par tweet, detail precis.\n- Dernier tweet = prise de position tranchee, pas resume.\n\nlinkedin_post (150-250 mots)\n- Ouverture : situation concrete en 1-2 lignes.\n- Corps : raisonnement, sauts de ligne frequents.\n- Fin : question ouverte reelle, ancree dans le metier du lecteur.\n\nshorts_script (oral, ~2,5 mots/sec)\n- [0-3s] hook : 8 mots max.\n- [3-25s] dev : 45-55 mots, exemple concret.\n- [25-40s] chute : 30-40 mots.\n\nSORTIE JSON : {"twitter_thread": [...], "linkedin_post": "...", "shorts_script": "..."}`
+        },
+        {
+          role: 'user',
+          content: `These : ${analysis.these}\nScene : ${analysis.scene || '-'}\nArguments : ${(analysis.arguments || []).join(' | ')}\nMoment fort : ${analysis.moment_fort || '-'}\nPublic : ${analysis.public}\nRegistre : ${analysis.registre}\n\nGenere.`
+        }
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.8
+    });
 
-  const raw = genCompletion.choices[0].message.content;
-  const clean = raw.replace(/```json|```/g, '').trim();
-  const result = JSON.parse(clean);
+    result = parseJSONRobuste(genCompletion.choices[0].message.content);
+    if (!result) throw new Error('Generation: JSON invalide');
+    console.log('[GEN] Writing done');
+  } catch (err) {
+    console.error('[GEN] Erreur generation:', err.message);
+    return res.status(500).json({ error: 'Erreur generation du contenu. Reessaie.' });
+  }
 
   // Post-processing
   if (Array.isArray(result.twitter_thread)) {
@@ -244,13 +286,13 @@ async function generateFromText(text, res) {
     if (result.twitter_thread.length < 3) {
       return res.status(422).json({
         error: 'QUALITE_INSUFFISANTE',
-        message: 'Le contenu genere n\'est pas assez solide. Essaye avec une video plus riche en faits et en anecdotes.'
+        message: 'Le contenu genere n\'est pas assez solide. Essaye avec une video plus riche en faits.'
       });
     }
   }
 
   result.transcript = text;
-  result._analysis = analysis;
+  console.log('[GEN] Done, sending');
   res.json(result);
 }
 
@@ -268,8 +310,8 @@ app.post('/from-text', async (req, res) => {
     await generateFromText(text, res);
     upsertUsageStmt.run(fingerprint);
   } catch (err) {
-    console.error('API Error:', err.message);
-    res.status(500).json({ error: 'Erreur API : ' + err.message });
+    console.error('[GEN ERROR]', err.message);
+    res.status(500).json({ error: 'Erreur generation : ' + err.message });
   }
 });
 
@@ -295,6 +337,7 @@ app.post('/from-audio', async (req, res) => {
     if (!fs.existsSync(join(__dirname, 'tmp'))) fs.mkdirSync(join(__dirname, 'tmp'));
     fs.writeFileSync(audioPath, Buffer.from(data, 'base64'));
 
+    console.log('[GEN] Transcribing audio...');
     const transcription = await openai.audio.transcriptions.create({
       file: createReadStream(audioPath),
       model: 'whisper-1',
@@ -306,16 +349,16 @@ app.post('/from-audio', async (req, res) => {
       return res.status(422).json({ error: 'TRANSCRIPTION_VIDE', message: 'L\'audio ne contient pas assez de parole.' });
     }
 
+    console.log(`[GEN] Audio transcribed, length: ${transcription.text.length}`);
     await generateFromText(transcription.text, res);
     upsertUsageStmt.run(fingerprint);
   } catch (err) {
     if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+    console.error('[GEN ERROR]', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
 app.listen(PORT, () => {
   console.log(`Server: http://localhost:${PORT}`);
-  console.log(`DB: ${DB_PATH}`);
-  console.log(`Stripe: ${STRIPE_SECRET ? 'OK' : 'NON CONFIGURE'}`);
 });
