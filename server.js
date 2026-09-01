@@ -202,9 +202,16 @@ RÈGLES ABSOLUES
 - Chaque bloc doit contenir des faits concrets (qui, quoi, où, quand).
 - Chaque tweet fait entre 140 et 240 caractères, sauf le premier (100 minimum).
   Un tweet plus court est incomplet : il lui manque le détail concret.
+  -- Tu n'inventes aucun fait. Si la transcription dit qu'un personnage refuse 
+  de faire quelque chose, tu ne peux pas écrire qu'il l'a fait. En cas de doute, 
+  reprends les mots de la transcription.
 
 EXEMPLE DE DÉCOUPAGE (structure et longueur à imiter) :
-Tweet 1 : "Une entreprise a perdu 460 millions de dollars en 45 minutes à cause d'une seule ligne de code oubliée. Elle n'a jamais réouvert."
+- Tweet 1 (Hook) : décris le RÉSULTAT ou le paradoxe final sans nommer 
+  les protagonistes ni révéler le mécanisme. Le lecteur doit se demander 
+  "comment c'est possible ?" et ne pas pouvoir deviner la suite.
+  Exemple de bon hook : "Un chauffeur a donné une conférence de physique 
+  devant une salle d'universitaires. Personne n'a rien remarqué."
 Tweet 2 : "En 2012, Knight Capital gérait un dixième du volume des actions américaines. Ce mardi-là, elle déploie un nouveau programme de trading sur ses huit serveurs. Sept reçoivent la mise à jour. Le huitième est oublié."
 Tweet 3 : "À l'ouverture des marchés, ce serveur exécute un vieux code de test resté dormant depuis huit ans. Il achète haut et vend bas, des millions de fois, sans que personne comprenne d'où viennent les ordres."
 Tweet 4 : "Il faut 45 minutes aux ingénieurs pour identifier la machine et la débrancher. La perte dépasse la valeur totale de l'entreprise. Elle est rachetée en quelques mois."
