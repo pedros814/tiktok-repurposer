@@ -16,9 +16,11 @@ const __dirname = dirname(__filename);
 
 const PORT = process.env.PORT || 3000;
 const FREE_LIMIT = parseInt(process.env.FREE_LIMIT || '3');
+const PRICE_ID = process.env.STRIPE_PRICE_ID;
 const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 const DOMAIN = process.env.DOMAIN || `http://localhost:${PORT}`;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const stripe = Stripe(STRIPE_SECRET);
@@ -98,21 +100,17 @@ function canUse(fingerprint) {
 
 const app = express();
 
+// ========== STRIPE WEBHOOK (verrouille) ==========
 app.post('/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  if (!STRIPE_WEBHOOK_SECRET) {
+    return res.status(500).send('Webhook secret not configured');
+  }
+  const sig = req.headers['stripe-signature'];
   let event;
-  if (STRIPE_WEBHOOK_SECRET) {
-    const sig = req.headers['stripe-signature'];
-    try {
-      event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
-    } catch (err) {
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-  } else {
-    try {
-      event = JSON.parse(req.body);
-    } catch (e) {
-      return res.status(400).send('Invalid JSON');
-    }
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
@@ -128,20 +126,12 @@ app.post('/stripe/webhook', express.raw({ type: 'application/json' }), async (re
   res.json({ received: true });
 });
 
-app.post('/api/simulate-payment', express.json(), (req, res) => {
-  const fingerprint = req.headers['x-client-id'] || req.body?.fingerprint;
-  if (!fingerprint) return res.status(400).json({ error: 'Missing fingerprint' });
-  const fakeSessionId = 'sim_' + randomUUID().slice(0, 8);
-  insertPaymentStmt.run(fakeSessionId, 'cus_sim', fingerprint, 990, 'completed');
-  updateUserStatusStmt.run('active', 'cus_sim', fingerprint);
-  resetUsageStmt.run(fingerprint);
-  res.json({ success: true, message: 'Compte active en mode test' });
-});
-
 app.use(cors());
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ extended: true, limit: '100mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(join(__dirname, 'public')));
+
+// ========== API ROUTES ==========
 
 app.get('/api/status', (req, res) => {
   const fingerprint = getFingerprint(req);
@@ -183,27 +173,54 @@ app.post('/api/create-checkout-session', async (req, res) => {
   }
 });
 
+// ========== CORE: PROMPT EN 2 ETAPES ==========
+
 async function generateFromText(text, res) {
-  const completion = await openai.chat.completions.create({
+  // --- ETAPE 1: ANALYSE (gpt-4o-mini, rapide) ---
+  const analysisCompletion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
         role: 'system',
-        content: `Expert contenu viral. Genere UNIQUEMENT un JSON valide :
-{
-  "twitter_thread": ["tweet1", "tweet2", "tweet3"],
-  "linkedin_post": "string",
-  "shorts_script": "string"
-}`
+        content: `Tu analyses une transcription orale brute. Extrais la substance.\n\nReponds UNIQUEMENT en JSON valide :\n{\n  "these": "l'affirmation principale en une phrase, telle qu'un lecteur la retiendrait",\n  "arguments": ["les 2-4 points qui la soutiennent"],\n  "moment_fort": "la phrase ou l'anecdote la plus marquante, citee telle quelle",\n  "public": "a qui ca parle",\n  "registre": "familier | pro | technique | humoristique"\n}\n\nSi la transcription n'a pas d'idee exploitable (unboxing muet, musique sans parole, etc.), mets these a null.`
       },
       { role: 'user', content: text }
     ],
     response_format: { type: 'json_object' }
   });
-  const raw = completion.choices[0].message.content;
+
+  const analysisRaw = analysisCompletion.choices[0].message.content;
+  const analysis = JSON.parse(analysisRaw.replace(/```json|```/g, '').trim());
+
+  if (!analysis.these) {
+    return res.status(422).json({
+      error: 'CONTENU_INSUFFISANT',
+      message: 'Cette video ne contient pas assez de matiere pour en faire un contenu ecrit. Essaye avec une video ou le locuteur developpe une idee, raconte une histoire ou donne des conseils.'
+    });
+  }
+
+  // --- ETAPE 2: GENERATION (gpt-4o, qualite) ---
+  const genCompletion = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content: `Tu ecris pour un createur de contenu. Tu pars d'une analyse, pas d'une transcription : n'essaie jamais de resumer la video, construis un contenu autonome.\n\nRÈGLES ABSOLUES\n- Aucun emoji, sauf si le registre est "humoristique" (max 1 par bloc).\n- Aucune de ces formules : "dans cet article", "plongeons", "il est important de", "voici pourquoi", "game-changer", "spoiler".\n- Phrases courtes. Une idee par phrase.\n- Pas de conclusion qui resume ce qui vient d'etre dit.\n\ntwitter_thread (3 a 5 tweets, 280 car. max chacun)\n- Tweet 1 = le hook. Une affirmation qui cree une tension ou contredit une evidence. Jamais une question rhetorique. Jamais "thread".\n- Tweets suivants = un argument chacun, du concret, des exemples.\n- Dernier tweet = une prise de position, pas un resume.\n\nlinkedin_post (150-250 mots)\n- Ouverture : une situation concrete en 1-2 lignes.\n- Corps : le raisonnement, avec des sauts de ligne frequents.\n- Fin : une question ouverte reelle, pas "qu'en pensez-vous ?".\n\nshorts_script (30-45s a l'oral)\n- Format : [0-3s] hook visuel + phrase / [3-25s] developpement / [25-40s] chute.\n- Ecrit pour etre dit a voix haute, pas lu.\n\nReponds uniquement en JSON : {"twitter_thread": [...], "linkedin_post": "...", "shorts_script": "..."}`
+      },
+      {
+        role: 'user',
+        content: `Analyse du contenu source :\n\nThese : ${analysis.these}\nArguments : ${analysis.arguments.join(' | ')}\nMoment fort : ${analysis.moment_fort}\nPublic : ${analysis.public}\nRegistre : ${analysis.registre}\n\nGenere les 3 formats.`
+      }
+    ],
+    response_format: { type: 'json_object' },
+    temperature: 0.7
+  });
+
+  const raw = genCompletion.choices[0].message.content;
   const clean = raw.replace(/```json|```/g, '').trim();
   const result = JSON.parse(clean);
   result.transcript = text;
+  result._analysis = analysis; // debug
   res.json(result);
 }
 
@@ -214,8 +231,8 @@ app.post('/from-text', async (req, res) => {
     return res.status(403).json({ error: 'QUOTA_EXCEEDED', message: 'Limite atteinte. Abonne-toi pour continuer.' });
   }
   const text = req.body?.text?.trim();
-  if (!text || text.length < 10) {
-    return res.status(400).json({ error: 'Texte trop court (min 10 caracteres)' });
+  if (!text || text.length < 20) {
+    return res.status(400).json({ error: 'Texte trop court (min 20 caracteres)' });
   }
   try {
     await generateFromText(text, res);
@@ -234,34 +251,45 @@ app.post('/from-audio', async (req, res) => {
   }
   const { filename, data } = req.body;
   if (!data) return res.status(400).json({ error: 'Aucun fichier recu' });
+
+  // Verif taille (Whisper limite a ~25Mo)
+  const sizeMB = (data.length * 0.75) / 1024 / 1024;
+  if (sizeMB > 25) {
+    return res.status(413).json({ error: 'Fichier trop lourd (max 25 Mo). Compresse l\'audio ou coupe en morceaux.' });
+  }
+
   const uid = randomUUID().slice(0, 8);
   const ext = filename?.split('.').pop() || 'mp3';
   const audioPath = join(__dirname, 'tmp', `${uid}.${ext}`);
+
   try {
     if (!fs.existsSync(join(__dirname, 'tmp'))) fs.mkdirSync(join(__dirname, 'tmp'));
     fs.writeFileSync(audioPath, Buffer.from(data, 'base64'));
+
     const transcription = await openai.audio.transcriptions.create({
       file: createReadStream(audioPath),
       model: 'whisper-1',
     });
+
     fs.unlinkSync(audioPath);
+
+    // Verif longueur transcription
+    if (!transcription.text || transcription.text.trim().length < 20) {
+      return res.status(422).json({ error: 'TRANSCRIPTION_VIDE', message: 'L\'audio ne contient pas assez de parole. Assure-toi que la video a du son clair.' });
+    }
+
     await generateFromText(transcription.text, res);
     upsertUsageStmt.run(fingerprint);
   } catch (err) {
     if (fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+    console.error('API Error:', err.message);
     res.status(500).json({ error: err.message });
   }
-});
-
-app.get('/api/stats', (req, res) => {
-  const users = db.prepare('SELECT COUNT(*) as count FROM users').get();
-  const active = db.prepare("SELECT COUNT(*) as count FROM users WHERE status = 'active'").get();
-  const payments = db.prepare("SELECT SUM(amount) as total FROM payments WHERE status = 'completed'").get();
-  res.json({ users: users.count, active: active.count, revenue: payments.total || 0 });
 });
 
 app.listen(PORT, () => {
   console.log(`Server: http://localhost:${PORT}`);
   console.log(`DB: ${DB_PATH}`);
   console.log(`Stripe: ${STRIPE_SECRET ? 'OK' : 'NON CONFIGURE'}`);
+  console.log(`Env: ${NODE_ENV}`);
 });
