@@ -153,28 +153,6 @@
       .fan-book:nth-child(8) { left: 78%; top: 116px; }
     }
   </style>
-  <!-- ====== Script de suivi des visiteurs et des clics ====== -->
-  <script src="//viralrepurpose.com/...." defer></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      // Suivi des clics vers Amazon (couvertures, titres et boutons "Voir sur Amazon")
-      document.querySelectorAll('a[href*="amzn.eu"]').forEach(function (link) {
-        link.addEventListener("click", function () {
-          var tome = "inconnu";
-          var card = link.closest("[data-template-id^='book-card-']");
-          if (card) { tome = card.getAttribute("data-template-id"); }
-          // Envoi d'un événement de clic vers le tracker
-          if (window.dataLayer) {
-            window.dataLayer.push({ event: "amazon_click", tome: tome, href: link.href });
-          }
-          // Fallback : pixel de suivi simple (à adapter à l'URL de votre outil)
-          var img = new Image();
-          img.src = "//viralrepurpose.com/click?tome=" + encodeURIComponent(tome);
-        });
-      });
-    });
-  </script>
-  <!-- ====== Fin du script de suivi ====== -->
   <script src="/_sdk/fbe2ebfd64647c54.data_sdk.js" type="text/javascript" integrity="sha512-vkTX6CfvpHc3WbjK+tFJCaDuw4ERA4aEV/e5/7+MMJPMTF4RJYCI6CAwJBT/gtDW+dba4uLSsPUgDjVDHWtgUQ=="></script>
   <script src="/_sdk/fcb6dc01f91829ac.resizing_sdk.js" type="text/javascript" integrity="sha512-YK8JfnN705qaEaVhiL7pcVB2Rs/BbdX5yxV55Az8zT/1JanyEWTw9HqCF915m9iV1YEaoil8qsjJz03l1Kb0Ug=="></script>
  </head>
