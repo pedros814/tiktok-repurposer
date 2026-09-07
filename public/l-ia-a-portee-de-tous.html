@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="fr"><head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260907-05-0068bad","C":{"Abril Fatface":"YACgEZbkUVE,0","Alfa Slab One":"YACgEYS9sJU,0","Anton":"YACgEcYqQ-A,0","Archivo":"YAHO2-t-jNE,0","Arial":"YAGyDvJ_4Ts,0","Bebas Neue":"YACgESME5ew,0","Bricolage Grotesque":"YAFyMcdwzpc,0","Canva Sans":"YAFLd8sKbwc,2","Caveat":"YALBs2ploWQ,0","Comic Sans MS":"YAHO2VMiyZo,0","Cormorant Garamond":"YAFdJhX-538,0","Courier New":"YAGzXiGs0_8,0","DM Sans":"YAD1aU3sLnI,0","DM Serif Display":"YAD1aYG82rc,0","Forum":"YACgEcnnqB4,0","Fraunces":"YAEul-FRQw4,0","Georgia":"YAGzXkO0pEM,0","Helvetica Neue":"YAFcf6CtJfI,0","Impact":"YAFcfnjI7Vk,0","Inter":"YAFdJvSyp_k,3","Iowan Old Style":"YAGNIFa8j9o,0","Jacques Francois":"YAHO2a5g66Q,0","JetBrains Mono":"YAFdJksXcAk,0","Libre Baskerville":"YACgEUFdPdA,0","Manrope":"YAHO2b2feC4,0","Merriweather":"YACgEXvHxxs,0","Montserrat":"YADLjI9qxTA,0","Nunito":"YACgEX8C5Gg,0","Oleo Script":"YACgEQQ14jI,0","Phantom Sans":"YAHO2E8Pb88,0","Playfair Display":"YACgEYmuCJE,0","Poppins":"YAFdJjbTu24,1","Press Start 2P":"YAFyGr-8pmQ,0","Quicksand":"YADWjpfPmdk,0","Raleway":"YACgEVg3xZg,0","Segoe UI":"YAHNdRD1Klw,0","Source Sans 3":"YAG4lO1Mj10,0","Spectral":"YAHO2rVUHIM,0","Times New Roman":"YAGzXW3gftg,0","Times":"YAGzXW3gftg,0","Ubuntu":"YACgERDU--Q,0","Work Sans":"YAGXhLOKv44,0","Yellowtail":"YACgEYG4kG4,0","ui-monospace":"YADlN8CFZ8Q,0","ui-sans-serif":"YACkoN-xg4g,0"}}');</script><script src="/_sdk/9e99ecf74af2a081.telemetry_sdk.js" integrity="sha512-tZ7fmfTx2KpCLjXQnEuL9azQ4A5+7+xumsx6r/WYVD0zCP/8LP8hDeCypMQesmP+WyAew4g7l5Ah23Bjd6yoVg=="></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L’IA À PORTÉE DE TOUS</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #10233d;
+      --paper: #f8f8f5;
+      --blue: #126ee8;
+      --mist: #edf2f7;
+      --line: #d8e1eb;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      width: 100%;
+      font-family: "Work Sans", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    .site-shell { width: 100%; overflow: hidden; }
+
+    .nav-link {
+      position: relative;
+      text-decoration: none;
+      transition: color .2s ease;
+    }
+
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      width: 100%;
+      height: 2px;
+      background: currentColor;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform .2s ease;
+    }
+
+    .nav-link:hover::after,
+    .nav-link:focus-visible::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .book-fan {
+      position: relative;
+      height: 335px;
+      max-width: 510px;
+      margin: 0 auto;
+    }
+
+    .fan-book {
+      position: absolute;
+      width: 106px;
+      aspect-ratio: 0.63;
+      overflow: hidden;
+      border-radius: 4px;
+      background: #fff;
+      box-shadow: 0 15px 32px rgba(16, 35, 61, .18);
+      border: 1px solid rgba(16, 35, 61, .1);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .fan-book img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .fan-book:hover {
+      z-index: 20;
+      transform: translateY(-13px) rotate(0deg) !important;
+      box-shadow: 0 23px 42px rgba(16, 35, 61, .25);
+    }
+
+    .fan-book:nth-child(1) { left: 0%; top: 98px; transform: rotate(-17deg); }
+    .fan-book:nth-child(2) { left: 12%; top: 58px; transform: rotate(-11deg); }
+    .fan-book:nth-child(3) { left: 25%; top: 22px; transform: rotate(-5deg); }
+    .fan-book:nth-child(4) { left: 38%; top: 2px; transform: rotate(-1deg); }
+    .fan-book:nth-child(5) { left: 51%; top: 7px; transform: rotate(3deg); }
+    .fan-book:nth-child(6) { left: 64%; top: 31px; transform: rotate(7deg); }
+    .fan-book:nth-child(7) { left: 75%; top: 67px; transform: rotate(12deg); }
+    .fan-book:nth-child(8) { left: 82%; top: 113px; transform: rotate(17deg); }
+
+    .book-card {
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+
+    .book-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 42px rgba(16, 35, 61, .10);
+    }
+
+    .book-card img {
+      transition: transform .35s ease;
+    }
+
+    .book-card:hover img { transform: scale(1.025); }
+
+    .outline-number {
+      color: transparent;
+      -webkit-text-stroke: 1px #afc8e8;
+      line-height: .8;
+      user-select: none;
+    }
+
+    .reveal {
+      animation: rise .65s ease both;
+    }
+
+    .delay-1 { animation-delay: .10s; }
+    .delay-2 { animation-delay: .20s; }
+    .delay-3 { animation-delay: .30s; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+      outline: 3px solid #126ee8;
+      outline-offset: 4px;
+    }
+
+    @media (max-width: 640px) {
+      .book-fan {
+        height: 280px;
+        max-width: 340px;
+      }
+
+      .fan-book { width: 74px; }
+      .fan-book:nth-child(1) { left: 0%; top: 105px; }
+      .fan-book:nth-child(2) { left: 11%; top: 69px; }
+      .fan-book:nth-child(3) { left: 23%; top: 33px; }
+      .fan-book:nth-child(4) { left: 35%; top: 7px; }
+      .fan-book:nth-child(5) { left: 48%; top: 11px; }
+      .fan-book:nth-child(6) { left: 60%; top: 37px; }
+      .fan-book:nth-child(7) { left: 71%; top: 74px; }
+      .fan-book:nth-child(8) { left: 78%; top: 116px; }
+    }
+  </style>
+  <script src="/_sdk/fbe2ebfd64647c54.data_sdk.js" type="text/javascript" integrity="sha512-vkTX6CfvpHc3WbjK+tFJCaDuw4ERA4aEV/e5/7+MMJPMTF4RJYCI6CAwJBT/gtDW+dba4uLSsPUgDjVDHWtgUQ=="></script>
+  <script src="/_sdk/fcb6dc01f91829ac.resizing_sdk.js" type="text/javascript" integrity="sha512-YK8JfnN705qaEaVhiL7pcVB2Rs/BbdX5yxV55Az8zT/1JanyEWTw9HqCF915m9iV1YEaoil8qsjJz03l1Kb0Ug=="></script>
+ </head>
+ <body data-template-id="__page-root" style="background: rgb(248, 248, 245);">
+  <div class="site-shell">
+   <header data-template-id="site-header" class="canva-header sticky top-0 z-50 border-b border-slate-200/80 bg-[#f8f8f5]/95 backdrop-blur" style="background: rgb(248, 248, 245);">
+    <nav class="mx-auto flex w-full max-w-7xl items-center justify-between gap-5 px-5 py-4 sm:px-8" aria-label="Navigation principale"><a href="#accueil" data-template-id="brand-name" class="canva-link shrink-0 font-bold tracking-tight no-underline" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 15px; letter-spacing: 0.02rem;">L’IA À PORTÉE DE TOUS</a>
+     <div class="flex items-center gap-4 text-sm font-medium sm:gap-7"><a href="#collection" data-template-id="nav-collection" class="canva-link nav-link" style="color: rgb(16, 35, 61); font-weight: 500; font-style: normal; font-size: 16px;">La collection</a> <a href="#publics" data-template-id="nav-publics" class="canva-link nav-link" style="color: rgb(16, 35, 61); font-weight: 500; font-style: normal; font-size: 16px;">Pour qui ?</a> <a href="#apropos" data-template-id="nav-about" class="canva-link nav-link" style="color: rgb(16, 35, 61); font-weight: 500; font-style: normal; font-size: 16px;">À propos</a>
+     </div>
+    </nav>
+   </header>
+   <main>
+    <section id="accueil" class="relative border-b border-[#d8e1eb]">
+     <div class="mx-auto grid w-full max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-2 lg:gap-16 lg:py-24">
+      <div class="reveal">
+       <p data-template-id="hero-eyebrow" class="canva-text mb-5 text-sm font-bold uppercase tracking-[0.17em]" style="color: rgb(18, 110, 232); font-weight: 700; font-style: normal; font-size: 14px; letter-spacing: 0.1rem;">Une collection éditoriale</p>
+       <h1 data-template-id="hero-title" class="canva-text max-w-xl font-extrabold tracking-[-0.055em]" style="color: rgb(16, 35, 61); font-weight: 800; font-style: normal; font-size: 60px; letter-spacing: -0.05rem; line-height: 0.98;">L’IA À PORTÉE DE TOUS</h1>
+       <p data-template-id="hero-subtitle" class="canva-text mt-6 max-w-xl text-lg leading-relaxed sm:text-xl" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 20px; line-height: 1.5;">Une collection de 8 livres pour comprendre, utiliser, vérifier et maîtriser l’intelligence artificielle</p><a href="#collection" data-template-id="hero-button" class="canva-button mt-9 inline-flex items-center gap-3 rounded-sm px-6 py-4 text-sm font-bold no-underline shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg" style="background: rgb(18, 110, 232); color: rgb(255, 255, 255);"> <span data-template-id="hero-button-label" class="canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Découvrir la collection</span> <i data-lucide="arrow-down" width="18" height="18" aria-hidden="true"></i> </a>
+      </div>
+      <div class="reveal delay-2" aria-label="Les huit couvertures de la collection">
+       <div class="book-fan">
+  <div class="fan-book"><a href="https://amzn.eu/d/02OXSAHe" target="_blank" rel="noopener"><img data-template-id="hero-book-1" class="canva-image" loading="lazy" src="images/tome1.png" alt="Tome 1"></a></div>
+  <div class="fan-book"><a href="https://amzn.eu/d/00uB09pj" target="_blank" rel="noopener"><img data-template-id="hero-book-2" class="canva-image" loading="lazy" src="images/tome2.png" alt="Tome 2"></a></div>
+  <div class="fan-book"><a href="https://amzn.eu/d/03ixiI4Y" target="_blank" rel="noopener"><img data-template-id="hero-book-3" class="canva-image" loading="lazy" src="images/tome3.png" alt="Tome 3"></a></div>
+  <div class="fan-book"><a href="https://amzn.eu/d/094MeG7C" target="_blank" rel="noopener"><img data-template-id="hero-book-4" class="canva-image" loading="lazy" src="images/tome4.png" alt="Tome 4"></a></div>
+  <div class="fan-book"><a href="https://amzn.eu/d/0dbnPpPg" target="_blank" rel="noopener"><img data-template-id="hero-book-5" class="canva-image" loading="lazy" src="images/tome5.png" alt="Tome 5"></a></div>
+  <div class="fan-book"><a href="https://amzn.eu/d/033DjCz5" target="_blank" rel="noopener"><img data-template-id="hero-book-6" class="canva-image" loading="lazy" src="images/tome6.png" alt="Tome 6"></a></div>
+  <div class="fan-book"><a href="https://amzn.eu/d/0fRoSFk1" target="_blank" rel="noopener"><img data-template-id="hero-book-7" class="canva-image" loading="lazy" src="images/tome7.png" alt="Tome 7"></a></div>
+  <div class="fan-book"><a href="https://amzn.eu/d/035O4fnC" target="_blank" rel="noopener"><img data-template-id="hero-book-8" class="canva-image" loading="lazy" src="images/tome8.png" alt="Tome 8"></a></div>
+</div>
+      </div>
+     </div>
+    </section>
+    <section id="collection" data-template-id="collection-section" class="canva-section px-5 py-18 sm:px-8 sm:py-24" style="background: rgb(248, 248, 245);">
+  <div class="mx-auto w-full max-w-7xl">
+    <div class="mb-12 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+      <div>
+        <p data-template-id="collection-eyebrow" class="canva-text mb-3 text-sm font-bold uppercase tracking-[0.16em]" style="color: rgb(18, 110, 232); font-weight: 700; font-style: normal; font-size: 14px; letter-spacing: 0.1rem;">La collection</p>
+        <h2 data-template-id="collection-title" class="canva-text font-bold tracking-[-0.04em]" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 42px; letter-spacing: -0.04rem;">Les 8 tomes</h2>
+      </div>
+      <p data-template-id="collection-intro" class="canva-text max-w-md leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 16px; line-height: 1.5;">Huit guides pensés pour faire de l’intelligence artificielle un outil concret, utile et maîtrisé.</p>
+    </div>
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      
+      <!-- Tome 1 -->
+      <article data-template-id="book-card-1" class="canva-card book-card flex flex-col justify-between overflow-hidden rounded-sm border border-[#d8e1eb]" style="background: rgb(255, 255, 255);">
+        <div>
+          <a href="https://amzn.eu/d/02OXSAHe" target="_blank" rel="noopener" class="block aspect-[.72] overflow-hidden bg-white">
+            <img data-template-id="book-image-1" class="canva-image h-full w-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" src="images/tome1.png" alt="Couverture du tome 1 L’intelligence artificielle à portée de tous">
+          </a>
+          <div class="p-5">
+            <p data-template-id="book-volume-1" class="canva-text text-xs font-bold uppercase tracking-[0.14em]" style="color: rgb(8, 119, 181); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Tome 1</p>
+            <h3 data-template-id="book-title-1" class="canva-text mt-3 font-bold leading-tight" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 20px; line-height: 1.1;">
+              <a href="https://amzn.eu/d/02OXSAHe" target="_blank" rel="noopener" class="hover:underline">L’intelligence artificielle à portée de tous</a>
+            </h3>
+            <p data-template-id="book-description-1" class="canva-text mt-3 text-sm leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 14px; line-height: 1.5;">Comprendre l’IA, l’utiliser au quotidien et garder le contrôle.</p>
+          </div>
+        </div>
+        <div class="px-5 pb-5 pt-0">
+          <a href="https://amzn.eu/d/02OXSAHe" target="_blank" rel="noopener" class="inline-block w-full text-center py-2 px-4 rounded bg-[#0877b5] text-white font-medium text-sm hover:opacity-90 transition-opacity">Voir sur Amazon</a>
+        </div>
+      </article>
+
+      <!-- Tome 2 -->
+      <article data-template-id="book-card-2" class="canva-card book-card flex flex-col justify-between overflow-hidden rounded-sm border border-[#d8e1eb]" style="background: rgb(255, 255, 255);">
+        <div>
+          <a href="https://amzn.eu/d/00uB09pj" target="_blank" rel="noopener" class="block aspect-[.72] overflow-hidden bg-white">
+            <img data-template-id="book-image-2" class="canva-image h-full w-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" src="images/tome2.png" alt="Couverture du tome 2 L’IA pour les seniors">
+          </a>
+          <div class="p-5">
+            <p data-template-id="book-volume-2" class="canva-text text-xs font-bold uppercase tracking-[0.14em]" style="color: rgb(0, 124, 104); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Tome 2</p>
+            <h3 data-template-id="book-title-2" class="canva-text mt-3 font-bold leading-tight" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 20px; line-height: 1.1;">
+              <a href="https://amzn.eu/d/00uB09pj" target="_blank" rel="noopener" class="hover:underline">L’IA pour les seniors</a>
+            </h3>
+            <p data-template-id="book-description-2" class="canva-text mt-3 text-sm leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 14px; line-height: 1.5;">Autonomie numérique, démarches, transmission et vigilance.</p>
+          </div>
+        </div>
+        <div class="px-5 pb-5 pt-0">
+          <a href="https://amzn.eu/d/00uB09pj" target="_blank" rel="noopener" class="inline-block w-full text-center py-2 px-4 rounded bg-[#007c68] text-white font-medium text-sm hover:opacity-90 transition-opacity">Voir sur Amazon</a>
+        </div>
+      </article>
+
+      <!-- Tome 3 -->
+      <article data-template-id="book-card-3" class="canva-card book-card flex flex-col justify-between overflow-hidden rounded-sm border border-[#d8e1eb]" style="background: rgb(255, 255, 255);">
+        <div>
+          <a href="https://amzn.eu/d/03ixiI4Y" target="_blank" rel="noopener" class="block aspect-[.72] overflow-hidden bg-white">
+            <img data-template-id="book-image-3" class="canva-image h-full w-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" src="images/tome3.png" alt="Couverture du tome 3 L’IA pour les jeunes">
+          </a>
+          <div class="p-5">
+            <p data-template-id="book-volume-3" class="canva-text text-xs font-bold uppercase tracking-[0.14em]" style="color: rgb(64, 84, 186); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Tome 3</p>
+            <h3 data-template-id="book-title-3" class="canva-text mt-3 font-bold leading-tight" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 20px; line-height: 1.1;">
+              <a href="https://amzn.eu/d/03ixiI4Y" target="_blank" rel="noopener" class="hover:underline">L’IA pour les jeunes</a>
+            </h3>
+            <p data-template-id="book-description-3" class="canva-text mt-3 text-sm leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 14px; line-height: 1.5;">Apprendre, créer, vérifier, s’orienter et rester autonome.</p>
+          </div>
+        </div>
+        <div class="px-5 pb-5 pt-0">
+          <a href="https://amzn.eu/d/03ixiI4Y" target="_blank" rel="noopener" class="inline-block w-full text-center py-2 px-4 rounded bg-[#4054ba] text-white font-medium text-sm hover:opacity-90 transition-opacity">Voir sur Amazon</a>
+        </div>
+      </article>
+
+      <!-- Tome 4 -->
+      <article data-template-id="book-card-4" class="canva-card book-card flex flex-col justify-between overflow-hidden rounded-sm border border-[#d8e1eb]" style="background: rgb(255, 255, 255);">
+        <div>
+          <a href="https://amzn.eu/d/094MeG7C" target="_blank" rel="noopener" class="block aspect-[.72] overflow-hidden bg-white">
+            <img data-template-id="book-image-4" class="canva-image h-full w-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" src="images/tome4.png" alt="Couverture du tome 4 L’IA pour les parents">
+          </a>
+          <div class="p-5">
+            <p data-template-id="book-volume-4" class="canva-text text-xs font-bold uppercase tracking-[0.14em]" style="color: rgb(198, 78, 107); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Tome 4</p>
+            <h3 data-template-id="book-title-4" class="canva-text mt-3 font-bold leading-tight" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 20px; line-height: 1.1;">
+              <a href="https://amzn.eu/d/094MeG7C" target="_blank" rel="noopener" class="hover:underline">L’IA pour les parents</a>
+            </h3>
+            <p data-template-id="book-description-4" class="canva-text mt-3 text-sm leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 14px; line-height: 1.5;">Accompagner, protéger, apprendre, dialoguer et garder le lien.</p>
+          </div>
+        </div>
+        <div class="px-5 pb-5 pt-0">
+          <a href="https://amzn.eu/d/094MeG7C" target="_blank" rel="noopener" class="inline-block w-full text-center py-2 px-4 rounded bg-[#c64e6b] text-white font-medium text-sm hover:opacity-90 transition-opacity">Voir sur Amazon</a>
+        </div>
+      </article>
+
+      <!-- Tome 5 -->
+      <article data-template-id="book-card-5" class="canva-card book-card flex flex-col justify-between overflow-hidden rounded-sm border border-[#d8e1eb]" style="background: rgb(255, 255, 255);">
+        <div>
+          <a href="https://amzn.eu/d/0dbnPpPg" target="_blank" rel="noopener" class="block aspect-[.72] overflow-hidden bg-white">
+            <img data-template-id="book-image-5" class="canva-image h-full w-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" src="images/tome5.png" alt="Couverture du tome 5 L’IA pour les entrepreneurs">
+          </a>
+          <div class="p-5">
+            <p data-template-id="book-volume-5" class="canva-text text-xs font-bold uppercase tracking-[0.14em]" style="color: rgb(184, 108, 22); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Tome 5</p>
+            <h3 data-template-id="book-title-5" class="canva-text mt-3 font-bold leading-tight" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 20px; line-height: 1.1;">
+              <a href="https://amzn.eu/d/0dbnPpPg" target="_blank" rel="noopener" class="hover:underline">L’IA pour les entrepreneurs</a>
+            </h3>
+            <p data-template-id="book-description-5" class="canva-text mt-3 text-sm leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 14px; line-height: 1.5;">Stratégie, productivité, données, automatisation et décision.</p>
+          </div>
+        </div>
+        <div class="px-5 pb-5 pt-0">
+          <a href="https://amzn.eu/d/0dbnPpPg" target="_blank" rel="noopener" class="inline-block w-full text-center py-2 px-4 rounded bg-[#b86c16] text-white font-medium text-sm hover:opacity-90 transition-opacity">Voir sur Amazon</a>
+        </div>
+      </article>
+
+      <!-- Tome 6 -->
+      <article data-template-id="book-card-6" class="canva-card book-card flex flex-col justify-between overflow-hidden rounded-sm border border-[#d8e1eb]" style="background: rgb(255, 255, 255);">
+        <div>
+          <a href="https://amzn.eu/d/033DjCz5" target="_blank" rel="noopener" class="block aspect-[.72] overflow-hidden bg-white">
+            <img data-template-id="book-image-6" class="canva-image h-full w-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" src="images/tome6.png" alt="Couverture du tome 6 L’IA pour les 50+">
+          </a>
+          <div class="p-5">
+            <p data-template-id="book-volume-6" class="canva-text text-xs font-bold uppercase tracking-[0.14em]" style="color: rgb(57, 125, 92); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Tome 6</p>
+            <h3 data-template-id="book-title-6" class="canva-text mt-3 font-bold leading-tight" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 20px; line-height: 1.1;">
+              <a href="https://amzn.eu/d/033DjCz5" target="_blank" rel="noopener" class="hover:underline">L’IA pour les 50+</a>
+            </h3>
+            <p data-template-id="book-description-6" class="canva-text mt-3 text-sm leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 14px; line-height: 1.5;">Évoluer, transmettre, accompagner et préparer la suite.</p>
+          </div>
+        </div>
+        <div class="px-5 pb-5 pt-0">
+          <a href="https://amzn.eu/d/033DjCz5" target="_blank" rel="noopener" class="inline-block w-full text-center py-2 px-4 rounded bg-[#397d5c] text-white font-medium text-sm hover:opacity-90 transition-opacity">Voir sur Amazon</a>
+        </div>
+      </article>
+
+      <!-- Tome 7 -->
+      <article data-template-id="book-card-7" class="canva-card book-card flex flex-col justify-between overflow-hidden rounded-sm border border-[#d8e1eb]" style="background: rgb(255, 255, 255);">
+        <div>
+          <a href="https://amzn.eu/d/0fRoSFk1" target="_blank" rel="noopener" class="block aspect-[.72] overflow-hidden bg-white">
+            <img data-template-id="book-image-7" class="canva-image h-full w-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" src="images/tome7.png" alt="Couverture du tome 7 L’IA pour les étudiants">
+          </a>
+          <div class="p-5">
+            <p data-template-id="book-volume-7" class="canva-text text-xs font-bold uppercase tracking-[0.14em]" style="color: rgb(61, 101, 164); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Tome 7</p>
+            <h3 data-template-id="book-title-7" class="canva-text mt-3 font-bold leading-tight" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 20px; line-height: 1.1;">
+              <a href="https://amzn.eu/d/0fRoSFk1" target="_blank" rel="noopener" class="hover:underline">L’IA pour les étudiants</a>
+            </h3>
+            <p data-template-id="book-description-7" class="canva-text mt-3 text-sm leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 14px; line-height: 1.5;">Étudier, chercher, construire, vérifier et devenir autonome.</p>
+          </div>
+        </div>
+        <div class="px-5 pb-5 pt-0">
+          <a href="https://amzn.eu/d/0fRoSFk1" target="_blank" rel="noopener" class="inline-block w-full text-center py-2 px-4 rounded bg-[#3d65a4] text-white font-medium text-sm hover:opacity-90 transition-opacity">Voir sur Amazon</a>
+        </div>
+      </article>
+
+      <!-- Tome 8 -->
+      <article data-template-id="book-card-8" class="canva-card book-card flex flex-col justify-between overflow-hidden rounded-sm border border-[#d8e1eb]" style="background: rgb(255, 255, 255);">
+        <div>
+          <a href="https://amzn.eu/d/035O4fnC" target="_blank" rel="noopener" class="block aspect-[.72] overflow-hidden bg-white">
+            <img data-template-id="book-image-8" class="canva-image h-full w-full object-cover transition-transform duration-300 hover:scale-105" loading="lazy" src="images/tome8.png" alt="Couverture du tome 8 L’IA pour les enseignants">
+          </a>
+          <div class="p-5">
+            <p data-template-id="book-volume-8" class="canva-text text-xs font-bold uppercase tracking-[0.14em]" style="color: rgb(118, 80, 155); font-weight: 700; font-style: normal; font-size: 12px; letter-spacing: 0.1rem;">Tome 8</p>
+            <h3 data-template-id="book-title-8" class="canva-text mt-3 font-bold leading-tight" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 20px; line-height: 1.1;">
+              <a href="https://amzn.eu/d/035O4fnC" target="_blank" rel="noopener" class="hover:underline">L’IA pour les enseignants</a>
+            </h3>
+            <p data-template-id="book-description-8" class="canva-text mt-3 text-sm leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 14px; line-height: 1.5;">Pédagogie, préparation, évaluation, esprit critique et responsabilité.</p>
+          </div>
+        </div>
+        <div class="px-5 pb-5 pt-0">
+          <a href="https://amzn.eu/d/035O4fnC" target="_blank" rel="noopener" class="inline-block w-full text-center py-2 px-4 rounded bg-[#76509b] text-white font-medium text-sm hover:opacity-90 transition-opacity">Voir sur Amazon</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+    <section id="publics" data-template-id="audience-section" class="canva-section border-y border-[#d8e1eb] px-5 py-18 sm:px-8 sm:py-24" style="background: rgb(237, 242, 247);">
+     <div class="mx-auto w-full max-w-7xl">
+      <div class="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-20">
+       <div>
+        <p data-template-id="audience-eyebrow" class="canva-text mb-3 text-sm font-bold uppercase tracking-[0.16em]" style="color: rgb(18, 110, 232); font-weight: 700; font-style: normal; font-size: 14px; letter-spacing: 0.1rem;">Une méthode simple</p>
+        <h2 data-template-id="audience-title" class="canva-text font-bold tracking-[-0.04em]" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 42px; letter-spacing: -0.04rem;">Une collection pour tous les publics</h2>
+        <p data-template-id="audience-text" class="canva-text mt-5 max-w-md leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 16px; line-height: 1.55;">Chaque tome propose des repères concrets pour aborder l’IA avec curiosité, discernement et autonomie.</p>
+       </div>
+       <div class="grid grid-cols-1 gap-px overflow-hidden rounded-sm border border-[#d8e1eb] bg-[#d8e1eb] sm:grid-cols-2">
+        <article data-template-id="pillar-card-1" class="canva-card relative min-h-52 overflow-hidden p-7" style="background: rgb(255, 255, 255); color: rgb(18, 110, 232);"><span class="outline-number absolute right-4 top-4 text-7xl font-extrabold">01</span> <i data-lucide="lightbulb" width="24" height="24" aria-hidden="true"></i>
+         <h3 data-template-id="pillar-title-1" class="canva-text relative mt-10 font-bold" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 25px;">Comprendre</h3>
+         <p data-template-id="pillar-text-1" class="canva-text relative mt-3 max-w-xs leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 15px; line-height: 1.5;">Découvrir les bases et les possibilités de l’intelligence artificielle.</p>
+        </article>
+        <article data-template-id="pillar-card-2" class="canva-card relative min-h-52 overflow-hidden p-7" style="background: rgb(255, 255, 255); color: rgb(18, 110, 232);"><span class="outline-number absolute right-4 top-4 text-7xl font-extrabold">02</span> <i data-lucide="mouse-pointer-click" width="24" height="24" aria-hidden="true"></i>
+         <h3 data-template-id="pillar-title-2" class="canva-text relative mt-10 font-bold" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 25px;">Utiliser</h3>
+         <p data-template-id="pillar-text-2" class="canva-text relative mt-3 max-w-xs leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 15px; line-height: 1.5;">Faire de l’IA un outil pertinent dans les situations du quotidien.</p>
+        </article>
+        <article data-template-id="pillar-card-3" class="canva-card relative min-h-52 overflow-hidden p-7" style="background: rgb(255, 255, 255); color: rgb(18, 110, 232);"><span class="outline-number absolute right-4 top-4 text-7xl font-extrabold">03</span> <i data-lucide="shield-check" width="24" height="24" aria-hidden="true"></i>
+         <h3 data-template-id="pillar-title-3" class="canva-text relative mt-10 font-bold" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 25px;">Vérifier</h3>
+         <p data-template-id="pillar-text-3" class="canva-text relative mt-3 max-w-xs leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 15px; line-height: 1.5;">Garder un regard critique sur les contenus, les sources et les réponses.</p>
+        </article>
+        <article data-template-id="pillar-card-4" class="canva-card relative min-h-52 overflow-hidden p-7" style="background: rgb(255, 255, 255); color: rgb(18, 110, 232);"><span class="outline-number absolute right-4 top-4 text-7xl font-extrabold">04</span> <i data-lucide="graduation-cap" width="24" height="24" aria-hidden="true"></i>
+         <h3 data-template-id="pillar-title-4" class="canva-text relative mt-10 font-bold" style="color: rgb(16, 35, 61); font-weight: 700; font-style: normal; font-size: 25px;">Maîtriser</h3>
+         <p data-template-id="pillar-text-4" class="canva-text relative mt-3 max-w-xs leading-relaxed" style="color: rgb(67, 84, 106); font-weight: 400; font-style: normal; font-size: 15px; line-height: 1.5;">Développer une pratique autonome, responsable et durable.</p>
+        </article>
+       </div>
+      </div>
+     </div>
+    </section>
+    <section data-template-id="cta-section" class="canva-section px-5 py-18 sm:px-8 sm:py-24" style="background: rgb(248, 248, 245);">
+     <div class="mx-auto flex w-full max-w-5xl flex-col items-start justify-between gap-8 rounded-sm px-7 py-10 sm:px-12 sm:py-14 lg:flex-row lg:items-center">
+      <div>
+       <p data-template-id="cta-eyebrow" class="canva-text mb-3 text-sm font-bold uppercase tracking-[0.16em]" style="color: rgb(143, 189, 248); font-weight: 700; font-style: normal; font-size: 14px; letter-spacing: 0.1rem;">Prêt à explorer ?</p>
+       <h2 data-template-id="cta-title" class="canva-text max-w-xl font-bold tracking-[-0.04em]" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 40px; letter-spacing: -0.04rem;">Découvrez la collection complète</h2>
+      </div><a href="#collection" data-template-id="cta-button" class="canva-button inline-flex shrink-0 items-center gap-3 rounded-sm px-6 py-4 text-sm font-bold no-underline transition hover:-translate-y-0.5 hover:shadow-lg" style="background: rgb(18, 110, 232); color: rgb(255, 255, 255);"> <span data-template-id="cta-button-label" class="canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Voir les 8 tomes</span> <i data-lucide="arrow-right" width="18" height="18" aria-hidden="true"></i> </a>
+     </div>
+    </section>
+   </main>
+   <footer id="apropos" data-template-id="site-footer" class="canva-footer border-t border-[#d8e1eb] px-5 py-8 sm:px-8" style="background: rgb(16, 35, 61);">
+    <div class="mx-auto flex w-full max-w-7xl flex-col justify-between gap-2 text-sm sm:flex-row">
+     <p data-template-id="footer-brand" class="canva-text font-bold tracking-wide" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 14px; letter-spacing: 0.06rem;">L’IA À PORTÉE DE TOUS</p>
+     <p data-template-id="footer-author" class="canva-text" style="color: rgb(197, 213, 231); font-weight: 500; font-style: normal; font-size: 14px;">Par Léo</p>
+    </div>
+   </footer>
+  </div>
+  <script src="/_sdk/92570d8e491862b9.editing_sdk.js" integrity="sha512-FgTgBgZOGUl1XBrojWdmYvV2Ka+jYLWeeIrMhp1Q1xMV3FJfF+VJFjO6hw+EDGnXYa+zMZXNIP5UYLxGsdfP6g=="></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+    });
+  </script>
+ 
+</body></html>
